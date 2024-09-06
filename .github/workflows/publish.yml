@@ -164,6 +164,7 @@ jobs:
           path: artifacts/*
 
   create-release:
+    permissions: read-all
     needs: [ windows-build, linux-build, macos-build ]
     runs-on: ubuntu-latest
     steps:
@@ -191,6 +192,9 @@ jobs:
           name: macos-assets-x86_64
           path: artifacts/macos-x86_64
 
+      - name: List files in artifacts directory
+        run: ls -R artifacts
+
       - name: Create GitHub Release
         id: create_release
         uses: softprops/action-gh-release@v2
@@ -201,5 +205,5 @@ jobs:
           body: |
             Take a look at the assets to download and install this app.
           files: artifacts/windows/* artifacts/linux/* artifacts/macos-aarch64/* artifacts/macos-x86_64/*
-          draft: false
+          draft: true
           prerelease: false
