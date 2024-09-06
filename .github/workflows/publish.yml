@@ -166,7 +166,8 @@ jobs:
   create-release:
     needs: [ windows-build, linux-build, macos-build ]
     runs-on: ubuntu-latest
-    permissions: write-all
+    permissions:
+      contents: write
     steps:
       - name: Download Windows assets
         uses: actions/download-artifact@v4
@@ -204,6 +205,10 @@ jobs:
           name: Desktop App v${{ needs.get-version.outputs.VERSION }}
           body: |
             Take a look at the assets to download and install this app.
-          files: artifacts/windows/* artifacts/linux/* artifacts/macos-aarch64/* artifacts/macos-x86_64/*
+          files: |
+            artifacts/windows/*
+            artifacts/linux/*
+            artifacts/macos-aarch64/*
+            artifacts/macos-x86_64/*
           draft: true
           prerelease: false
