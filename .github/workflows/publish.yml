@@ -58,7 +58,7 @@ jobs:
           7z a -tzip ../../../artifacts/bilibili-manga-watermark-remover_${{ env.VERSION }}_windows_x64_portable.zip bilibili-manga-watermark-remover.exe
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: windows-assets
           path: artifacts/*
@@ -160,11 +160,11 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: macos-assets
+          name: macos-assets-${{ matrix.arch }}
           path: artifacts/*
 
   create-release:
-    needs: [windows-build, linux-build, macos-build]
+    needs: [ windows-build, linux-build, macos-build ]
     runs-on: ubuntu-latest
     steps:
       - name: Download Windows assets
@@ -179,11 +179,17 @@ jobs:
           name: linux-assets
           path: artifacts/linux
 
-      - name: Download macOS assets
+      - name: Download macOS aarch64 assets
         uses: actions/download-artifact@v4
         with:
-          name: macos-assets
-          path: artifacts/macos
+          name: macos-assets-aarch64
+          path: artifacts/macos-aarch64
+
+      - name: Download macOS x86_64 assets
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-assets-x86_64
+          path: artifacts/macos-x86_64
 
       - name: Create GitHub Release
         id: create_release
@@ -194,6 +200,6 @@ jobs:
           name: Desktop App v${{ needs.get-version.outputs.VERSION }}
           body: |
             Take a look at the assets to download and install this app.
-          files: artifacts/windows/* artifacts/linux/* artifacts/macos/*
+          files: artifacts/windows/* artifacts/linux/* artifacts/macos-aarch64/* artifacts/macos-x86_64/*
           draft: false
           prerelease: false
