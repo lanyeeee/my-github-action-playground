@@ -23,6 +23,8 @@ jobs:
     needs: get-version
     env:
       VERSION: ${{ needs.get-version.outputs.VERSION }}
+    outputs:
+      VERSION: ${{ env.VERSION }}
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -67,6 +69,8 @@ jobs:
     needs: get-version
     env:
       VERSION: ${{ needs.get-version.outputs.VERSION }}
+    outputs:
+      VERSION: ${{ env.VERSION }}
     runs-on: ubuntu-22.04
     steps:
       - name: install dependencies
@@ -118,6 +122,8 @@ jobs:
     needs: get-version
     env:
       VERSION: ${{ needs.get-version.outputs.VERSION }}
+    outputs:
+      VERSION: ${{ env.VERSION }}
     strategy:
       fail-fast: false
       matrix:
@@ -202,7 +208,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: Desktop App v${{ needs.get-version.outputs.VERSION }}
+          name: Desktop App v${{ needs.windows-build.outputs.VERSION }}
           body: |
             Take a look at the assets to download and install this app.
           files: |
