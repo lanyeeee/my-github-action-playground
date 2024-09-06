@@ -1,0 +1,196 @@
+name: "publish"
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  get-version:
+    runs-on: ubuntu-latest
+    outputs:
+      VERSION: ${{ steps.get_version.outputs.VERSION }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get version number
+        id: get_version
+        run: |
+          VERSION=$(jq -r '.version' src-tauri/tauri.conf.json)
+          echo $VERSION
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+  windows-build:
+    needs: get-version
+    env:
+      VERSION: ${{ needs.get-version.outputs.VERSION }}
+    permissions:
+      contents: write
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Install frontend dependencies
+        run: pnpm install
+
+      - name: Build tauri app
+        uses: tauri-apps/tauri-action@v0
+
+      - name: Create release assets
+        run: mkdir -p release
+
+      - name: Copy nsis to release assets
+        run: cp src-tauri/target/release/bundle/nsis/bilibili-manga-watermark-remover_${{ env.VERSION }}_x64-setup.exe release/bilibili-manga-watermark-remover_${{ env.VERSION }}_windows_x64_setup.exe
+
+      - name: Zip portable to release assets
+        run: |
+          cd src-tauri/target/release
+          7z a -tzip ../../../release/bilibili-manga-watermark-remover_${{ env.VERSION }}_windows_x64_portable.zip bilibili-manga-watermark-remover.exe
+
+      - name: Upload release assets
+        id: action_gh_release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: Desktop App v${{ env.VERSION }}
+          body: |
+            Take a look at the assets to download and install this app.
+          files: release/*
+          draft: true
+          prerelease: false
+
+  linux-build:
+    needs: get-version
+    env:
+      VERSION: ${{ needs.get-version.outputs.VERSION }}
+    permissions:
+      contents: write
+    runs-on: ubuntu-22.04
+    steps:
+      - name: install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Install frontend dependencies
+        run: pnpm install
+
+      - name: Build tauri app
+        uses: tauri-apps/tauri-action@v0
+
+      - name: Create release assets
+        run: mkdir -p release
+
+      - name: Copy deb to release assets
+        run: cp src-tauri/target/release/bundle/deb/bilibili-manga-watermark-remover_${{ env.VERSION }}_amd64.deb release/bilibili-manga-watermark-remover_${{ env.VERSION }}_linux_amd64.deb
+
+      - name: Copy rpm to release assets
+        run: cp src-tauri/target/release/bundle/rpm/bilibili-manga-watermark-remover-${{ env.VERSION }}-1.x86_64.rpm release/bilibili-manga-watermark-remover_${{ env.VERSION }}_linux_amd64.rpm
+
+      - name: Zip portable to release assets
+        run: |
+          cd src-tauri/target/release
+          tar -czf ../../../release/bilibili-manga-watermark-remover_${{ env.VERSION }}_linux_amd64_portable.tar.gz bilibili-manga-watermark-remover
+
+      - name: Upload release assets
+        id: action_gh_release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: Desktop App v${{ env.VERSION }}
+          body: |
+            Take a look at the assets to download and install this app.
+          files: release/*
+          draft: true
+          prerelease: false
+
+  macos-build:
+    needs: get-version
+    env:
+      VERSION: ${{ needs.get-version.outputs.VERSION }}
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [ aarch64, x86_64 ]
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.arch }}-apple-darwin
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Install frontend dependencies
+        run: pnpm install
+
+      - name: Build tauri app
+        uses: tauri-apps/tauri-action@v0
+        with:
+          args: --target ${{ matrix.arch }}-apple-darwin"
+
+      - name: Create release assets
+        run: mkdir -p release
+
+      - name: Copy dmg to release assets
+        env:
+          ARCH_ALIAS: ${{ matrix.arch == 'x86_64' && 'x64' || matrix.arch }}
+        run: cp src-tauri/target/${{ matrix.arch }}-apple-darwin/release/bundle/dmg/bilibili-manga-watermark-remover_${{ env.VERSION }}_${{ env.ARCH_ALIAS }}.dmg release/bilibili-manga-watermark-remover_${{ env.VERSION }}_macos_${{ matrix.arch }}.dmg
+
+      - name: Upload release assets
+        id: action_gh_release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: Desktop App v${{ env.VERSION }}
+          body: |
+            Take a look at the assets to download and install this app.
+          files: release/*
+          draft: true
+          prerelease: false
