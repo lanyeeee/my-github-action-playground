@@ -166,6 +166,7 @@ jobs:
   create-release:
     needs: [ windows-build, linux-build, macos-build ]
     runs-on: ubuntu-latest
+    permissions: write-all
     steps:
       - name: Download Windows assets
         uses: actions/download-artifact@v4
