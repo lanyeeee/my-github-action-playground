@@ -50,7 +50,7 @@ jobs:
         run: mkdir -p artifacts
 
       - name: Copy nsis to release assets
-        run: cp src-tauri/target/release/bundle/nsis/bilibili-manga-watermark-remover_${{ env.VERSION }}_x64-setup.exe artifacts/bilibili-manga-watermark-remover_${{ env.VERSION }}_windows_x64_setup.exe
+        run: cp src-tauri/target/release/bundle/nsis/bilibili-manga-watermark-remover_${{ env.VERSION }}_x64-setup.exe artifacts/bilibili-manga-watermark-remover_${{ env.VERSION }}_windows_x64.exe
 
       - name: Zip portable to release assets
         run: |
