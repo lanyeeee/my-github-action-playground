@@ -17,19 +17,13 @@ jobs:
         id: get_version
         run: |
           VERSION=$(jq -r '.version' src-tauri/tauri.conf.json)
-          echo $VERSION
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
   windows-build:
     needs: get-version
     env:
       VERSION: ${{ needs.get-version.outputs.VERSION }}
-    permissions:
-      contents: write
     runs-on: windows-latest
-    defaults:
-      run:
-        shell: bash
     steps:
       - uses: actions/checkout@v4
 
@@ -52,43 +46,33 @@ jobs:
       - name: Build tauri app
         uses: tauri-apps/tauri-action@v0
 
-      - name: Create release assets
-        run: mkdir -p release
+      - name: Create artifacts directory
+        run: mkdir -p artifacts
 
       - name: Copy nsis to release assets
-        run: cp src-tauri/target/release/bundle/nsis/bilibili-manga-watermark-remover_${{ env.VERSION }}_x64-setup.exe release/bilibili-manga-watermark-remover_${{ env.VERSION }}_windows_x64_setup.exe
+        run: cp src-tauri/target/release/bundle/nsis/bilibili-manga-watermark-remover_${{ env.VERSION }}_x64-setup.exe artifacts/bilibili-manga-watermark-remover_${{ env.VERSION }}_windows_x64_setup.exe
 
       - name: Zip portable to release assets
         run: |
           cd src-tauri/target/release
-          7z a -tzip ../../../release/bilibili-manga-watermark-remover_${{ env.VERSION }}_windows_x64_portable.zip bilibili-manga-watermark-remover.exe
+          7z a -tzip ../../../artifacts/bilibili-manga-watermark-remover_${{ env.VERSION }}_windows_x64_portable.zip bilibili-manga-watermark-remover.exe
 
-      - name: Upload release assets
-        id: action_gh_release
-        uses: softprops/action-gh-release@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
         with:
-          name: Desktop App v${{ env.VERSION }}
-          body: |
-            Take a look at the assets to download and install this app.
-          files: release/*
-          draft: true
-          prerelease: false
+          name: windows-assets
+          path: artifacts/*
 
   linux-build:
     needs: get-version
     env:
       VERSION: ${{ needs.get-version.outputs.VERSION }}
-    permissions:
-      contents: write
     runs-on: ubuntu-22.04
     steps:
       - name: install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
-
       - uses: actions/checkout@v4
 
       - name: Setup node
@@ -110,39 +94,30 @@ jobs:
       - name: Build tauri app
         uses: tauri-apps/tauri-action@v0
 
-      - name: Create release assets
-        run: mkdir -p release
+      - name: Create artifacts directory
+        run: mkdir -p artifacts
 
       - name: Copy deb to release assets
-        run: cp src-tauri/target/release/bundle/deb/bilibili-manga-watermark-remover_${{ env.VERSION }}_amd64.deb release/bilibili-manga-watermark-remover_${{ env.VERSION }}_linux_amd64.deb
+        run: cp src-tauri/target/release/bundle/deb/bilibili-manga-watermark-remover_${{ env.VERSION }}_amd64.deb artifacts/bilibili-manga-watermark-remover_${{ env.VERSION }}_linux_amd64.deb
 
       - name: Copy rpm to release assets
-        run: cp src-tauri/target/release/bundle/rpm/bilibili-manga-watermark-remover-${{ env.VERSION }}-1.x86_64.rpm release/bilibili-manga-watermark-remover_${{ env.VERSION }}_linux_amd64.rpm
+        run: cp src-tauri/target/release/bundle/rpm/bilibili-manga-watermark-remover-${{ env.VERSION }}-1.x86_64.rpm artifacts/bilibili-manga-watermark-remover_${{ env.VERSION }}_linux_amd64.rpm
 
       - name: Zip portable to release assets
         run: |
           cd src-tauri/target/release
-          tar -czf ../../../release/bilibili-manga-watermark-remover_${{ env.VERSION }}_linux_amd64_portable.tar.gz bilibili-manga-watermark-remover
+          tar -czf ../../../artifacts/bilibili-manga-watermark-remover_${{ env.VERSION }}_linux_amd64_portable.tar.gz bilibili-manga-watermark-remover
 
-      - name: Upload release assets
-        id: action_gh_release
-        uses: softprops/action-gh-release@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
         with:
-          name: Desktop App v${{ env.VERSION }}
-          body: |
-            Take a look at the assets to download and install this app.
-          files: release/*
-          draft: true
-          prerelease: false
+          name: linux-assets
+          path: artifacts/*
 
   macos-build:
     needs: get-version
     env:
       VERSION: ${{ needs.get-version.outputs.VERSION }}
-    permissions:
-      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -172,25 +147,53 @@ jobs:
       - name: Build tauri app
         uses: tauri-apps/tauri-action@v0
         with:
-          args: --target ${{ matrix.arch }}-apple-darwin"
+          args: --target ${{ matrix.arch }}-apple-darwin
 
-      - name: Create release assets
-        run: mkdir -p release
+      - name: Create artifacts directory
+        run: mkdir -p artifacts
 
       - name: Copy dmg to release assets
         env:
           ARCH_ALIAS: ${{ matrix.arch == 'x86_64' && 'x64' || matrix.arch }}
-        run: cp src-tauri/target/${{ matrix.arch }}-apple-darwin/release/bundle/dmg/bilibili-manga-watermark-remover_${{ env.VERSION }}_${{ env.ARCH_ALIAS }}.dmg release/bilibili-manga-watermark-remover_${{ env.VERSION }}_macos_${{ matrix.arch }}.dmg
+        run: cp src-tauri/target/${{ matrix.arch }}-apple-darwin/release/bundle/dmg/bilibili-manga-watermark-remover_${{ env.VERSION }}_${{ env.ARCH_ALIAS }}.dmg artifacts/bilibili-manga-watermark-remover_${{ env.VERSION }}_macos_${{ matrix.arch }}.dmg
 
-      - name: Upload release assets
-        id: action_gh_release
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-assets
+          path: artifacts/*
+
+  create-release:
+    needs: [windows-build, linux-build, macos-build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Windows assets
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-assets
+          path: artifacts/windows
+
+      - name: Download Linux assets
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-assets
+          path: artifacts/linux
+
+      - name: Download macOS assets
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-assets
+          path: artifacts/macos
+
+      - name: Create GitHub Release
+        id: create_release
         uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: Desktop App v${{ env.VERSION }}
+          name: Desktop App v${{ needs.get-version.outputs.VERSION }}
           body: |
             Take a look at the assets to download and install this app.
-          files: release/*
-          draft: true
+          files: artifacts/windows/* artifacts/linux/* artifacts/macos/*
+          draft: false
           prerelease: false
