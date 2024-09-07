@@ -26,6 +26,7 @@ impl Config {
             output_optimize: false,
             bili_cookie: String::new(),
         };
+        println!("config_path: {:?}", config_path);
         let config = if config_path.exists() {
             let config_string = std::fs::read_to_string(config_path)?;
             serde_json::from_str(&config_string).unwrap_or(default_config)
