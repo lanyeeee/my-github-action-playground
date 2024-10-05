@@ -1,5 +1,8 @@
 name: "publish"
 
+env:
+  PROJECT_NAME: jmcomic-downloader
+
 on:
   push:
     tags:
@@ -23,6 +26,7 @@ jobs:
     needs: get-version
     env:
       VERSION: ${{ needs.get-version.outputs.VERSION }}
+      PROJECT_NAME: ${{ env.PROJECT_NAME }}
     outputs:
       VERSION: ${{ env.VERSION }}
     runs-on: windows-latest
@@ -52,12 +56,12 @@ jobs:
         run: mkdir -p artifacts
 
       - name: Copy nsis to release assets
-        run: cp src-tauri/target/release/bundle/nsis/bilibili-manga-watermark-remover_${{ env.VERSION }}_x64-setup.exe artifacts/bilibili-manga-watermark-remover_${{ env.VERSION }}_windows_x64.exe
+        run: cp src-tauri/target/release/bundle/nsis/${{ env.PROJECT_NAME }}_${{ env.VERSION }}_x64-setup.exe artifacts/${{ env.PROJECT_NAME }}_${{ env.VERSION }}_windows_x64.exe
 
       - name: Zip portable to release assets
         run: |
           cd src-tauri/target/release
-          7z a -tzip ../../../artifacts/bilibili-manga-watermark-remover_${{ env.VERSION }}_windows_x64_portable.zip bilibili-manga-watermark-remover.exe
+          7z a -tzip ../../../artifacts/${{ env.PROJECT_NAME }}_${{ env.VERSION }}_windows_x64_portable.zip ${{ env.PROJECT_NAME }}.exe
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -69,6 +73,7 @@ jobs:
     needs: get-version
     env:
       VERSION: ${{ needs.get-version.outputs.VERSION }}
+      PROJECT_NAME: ${{ env.PROJECT_NAME }}
     outputs:
       VERSION: ${{ env.VERSION }}
     runs-on: ubuntu-22.04
@@ -102,15 +107,15 @@ jobs:
         run: mkdir -p artifacts
 
       - name: Copy deb to release assets
-        run: cp src-tauri/target/release/bundle/deb/bilibili-manga-watermark-remover_${{ env.VERSION }}_amd64.deb artifacts/bilibili-manga-watermark-remover_${{ env.VERSION }}_linux_amd64.deb
+        run: cp src-tauri/target/release/bundle/deb/${{ env.PROJECT_NAME }}_${{ env.VERSION }}_amd64.deb artifacts/${{ env.PROJECT_NAME }}_${{ env.VERSION }}_linux_amd64.deb
 
       - name: Copy rpm to release assets
-        run: cp src-tauri/target/release/bundle/rpm/bilibili-manga-watermark-remover-${{ env.VERSION }}-1.x86_64.rpm artifacts/bilibili-manga-watermark-remover_${{ env.VERSION }}_linux_amd64.rpm
+        run: cp src-tauri/target/release/bundle/rpm/${{ env.PROJECT_NAME }}-${{ env.VERSION }}-1.x86_64.rpm artifacts/${{ env.PROJECT_NAME }}_${{ env.VERSION }}_linux_amd64.rpm
 
       - name: Zip portable to release assets
         run: |
           cd src-tauri/target/release
-          tar -czf ../../../artifacts/bilibili-manga-watermark-remover_${{ env.VERSION }}_linux_amd64_portable.tar.gz bilibili-manga-watermark-remover
+          tar -czf ../../../artifacts/${{ env.PROJECT_NAME }}_${{ env.VERSION }}_linux_amd64_portable.tar.gz ${{ env.PROJECT_NAME }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -122,6 +127,7 @@ jobs:
     needs: get-version
     env:
       VERSION: ${{ needs.get-version.outputs.VERSION }}
+      PROJECT_NAME: ${{ env.PROJECT_NAME }}
     outputs:
       VERSION: ${{ env.VERSION }}
     strategy:
@@ -161,7 +167,7 @@ jobs:
       - name: Copy dmg to release assets
         env:
           ARCH_ALIAS: ${{ matrix.arch == 'x86_64' && 'x64' || matrix.arch }}
-        run: cp src-tauri/target/${{ matrix.arch }}-apple-darwin/release/bundle/dmg/bilibili-manga-watermark-remover_${{ env.VERSION }}_${{ env.ARCH_ALIAS }}.dmg artifacts/bilibili-manga-watermark-remover_${{ env.VERSION }}_macos_${{ matrix.arch }}.dmg
+        run: cp src-tauri/target/${{ matrix.arch }}-apple-darwin/release/bundle/dmg/${{ env.PROJECT_NAME }}_${{ env.VERSION }}_${{ env.ARCH_ALIAS }}.dmg artifacts/${{ env.PROJECT_NAME }}_${{ env.VERSION }}_macos_${{ matrix.arch }}.dmg
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
