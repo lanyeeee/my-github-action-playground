@@ -1,45 +1,49 @@
 [package]
-name = "bilibili-manga-watermark-remover"
-version = "0.0.0"
+name = "jmcomic-downloader"
+version = "0.1.0"
 description = "A Tauri App"
 authors = ["you"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+name = "jmcomic_downloader_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
 [build-dependencies]
 tauri-build = { version = "2.0.0-rc", features = [] }
 
 [dependencies]
-tauri = { version = "2.0.0-rc", features = ["devtools"] }
+tauri = { version = "2.0.0-rc", features = [] }
 tauri-plugin-shell = { version = "2.0.0-rc" }
 tauri-plugin-dialog = { version = "2.0.0-rc" }
-tauri-plugin-fs = { version = "2.0.0-rc" }
+
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1" }
+serde-aux = { version = "4.5.0" }
 
 specta = { version = "2.0.0-rc" }
 tauri-specta = { version = "2.0.0-rc", features = ["derive", "typescript"] }
 specta-typescript = { version = "0.0.7" }
 
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
+reqwest = { version = "0.12", features = ["rustls-tls", "json", "__internal_proxy_sys_no_cache"], default-features = false }
+reqwest-retry = { version = "0.6.1" }
+reqwest-middleware = { version = "0.3.3 " }
 
-base64 = { version = "0.22.1" }
-image = { version = "0.25.1", default-features = false, features = ["jpeg", "png"] }
-jpeg-encoder = { version = "0.6.0", features = ["simd"] }
-imagesize = { version = "0.13.0" }
+base64 = { version = "0.22" }
+md5 = { version = "0.7.0" }
+aes = { version = "0.8.4" }
 
-reqwest = { version = "0.12.5" }
-qrcode = { version = "0.14.1" }
-rayon = { version = "1.10" }
-walkdir = { version = "2" }
-anyhow = { version = "1.0" }
+anyhow = { version = "1" }
+tokio = { version = "1.40.0", features = ["full"] }
+bytes = { version = "1.7.2" }
+image = { version = "0.25.2", default-features = false, features = ["jpeg", "png", "webp"] }
 showfile = { version = "0.1.1" }
-dirs = { version = "5.0" }
 path-slash = { version = "0.2.1" }
-tokio = { version = "1", features = ["full"] }
 
 [profile.release]
-strip = true      # Automatically strip symbols from the binary.
+strip = true
 lto = true
 codegen-units = 1
 panic = "abort"

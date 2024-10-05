@@ -5,64 +5,13 @@
 
 
 export const commands = {
-async generateBackground(mangaDir: string, rectData: RectData | null, width: number, height: number) : Promise<Result<CommandResponse<null>, CommandError>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("generate_background", { mangaDir, rectData, width, height }) };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
+async greet(name: string) : Promise<string> {
+    return await TAURI_INVOKE("greet", { name });
 },
-async removeWatermark(mangaDir: string, outputDir: string, format: ImageFormat, optimize: boolean, backgroundsData: ([JpgImageData, JpgImageData])[]) : Promise<Result<CommandResponse<null>, CommandError>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("remove_watermark", { mangaDir, outputDir, format, optimize, backgroundsData }) };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
-async openImage(path: string) : Promise<Result<CommandResponse<JpgImageData>, CommandError>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("open_image", { path }) };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
-async getMangaDirData(mangaDir: string) : Promise<Result<CommandResponse<MangaDirData[]>, CommandError>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("get_manga_dir_data", { mangaDir }) };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
-async getJpgImageInfos(mangaDir: string) : Promise<CommandResponse<JpgImageInfo[]>> {
-    return await TAURI_INVOKE("get_jpg_image_infos", { mangaDir });
-},
-async showPathInFileManager(path: string) : Promise<void> {
-    await TAURI_INVOKE("show_path_in_file_manager", { path });
-},
-async getBackgroundDirRelativePath(mangaDir: string, width: number, height: number) : Promise<Result<CommandResponse<string>, CommandError>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("get_background_dir_relative_path", { mangaDir, width, height }) };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
-async getBackgroundDirAbsPath(mangaDir: string, width: number, height: number) : Promise<Result<CommandResponse<string>, CommandError>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("get_background_dir_abs_path", { mangaDir, width, height }) };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
-async getConfig() : Promise<CommandResponse<Config>> {
+async getConfig() : Promise<Config> {
     return await TAURI_INVOKE("get_config");
 },
-async saveConfig(config: Config) : Promise<Result<CommandResponse<null>, CommandError>> {
+async saveConfig(config: Config) : Promise<Result<null, CommandError>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("save_config", { config }) };
 } catch (e) {
@@ -70,49 +19,81 @@ async saveConfig(config: Config) : Promise<Result<CommandResponse<null>, Command
     else return { status: "error", error: e  as any };
 }
 },
-async searchManga(keyword: string) : Promise<Result<CommandResponse<SearchData>, CommandError>> {
+async login(username: string, password: string) : Promise<Result<UserProfileRespData, CommandError>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("search_manga", { keyword }) };
+    return { status: "ok", data: await TAURI_INVOKE("login", { username, password }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
 },
-async generateQrCode() : Promise<Result<CommandResponse<QrCodeData>, CommandError>> {
+async search(keyword: string, page: number, sort: SearchSort) : Promise<Result<SearchResult, CommandError>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("generate_qr_code") };
+    return { status: "ok", data: await TAURI_INVOKE("search", { keyword, page, sort }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
 },
-async getQrCodeStatusData(qrcodeKey: string) : Promise<Result<CommandResponse<QrCodeStatusData>, CommandError>> {
+async getAlbum(aid: number) : Promise<Result<Album, CommandError>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("get_qr_code_status_data", { qrcodeKey }) };
+    return { status: "ok", data: await TAURI_INVOKE("get_album", { aid }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
 },
-async getBiliCookieStatusData(biliCookie: string) : Promise<Result<CommandResponse<CookieStatusData>, CommandError>> {
+async getChapter(id: number) : Promise<Result<ChapterRespData, CommandError>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("get_bili_cookie_status_data", { biliCookie }) };
+    return { status: "ok", data: await TAURI_INVOKE("get_chapter", { id }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
 },
-async downloadEpisodes(episodes: Episode[]) : Promise<Result<CommandResponse<null>, CommandError>> {
+async getScrambleId(id: number) : Promise<Result<number, CommandError>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("download_episodes", { episodes }) };
+    return { status: "ok", data: await TAURI_INVOKE("get_scramble_id", { id }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
 },
-async getMangaEpisodes(id: number) : Promise<Result<CommandResponse<Episode[]>, CommandError>> {
+async getFavoriteFolder(folderId: number, page: number, sort: FavoriteSort) : Promise<Result<FavoriteRespData, CommandError>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("get_manga_episodes", { id }) };
+    return { status: "ok", data: await TAURI_INVOKE("get_favorite_folder", { folderId, page, sort }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async getUserProfile() : Promise<Result<UserProfileRespData, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_user_profile") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async downloadChapters(chapterInfos: ChapterInfo[]) : Promise<Result<null, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("download_chapters", { chapterInfos }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async showPathInFileManager(path: string) : Promise<Result<null, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("show_path_in_file_manager", { path }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async syncFavoriteFolder() : Promise<Result<null, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("sync_favorite_folder") };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -124,25 +105,21 @@ async getMangaEpisodes(id: number) : Promise<Result<CommandResponse<Episode[]>, 
 
 
 export const events = __makeEvents__<{
-downloadEpisodeEndEvent: DownloadEpisodeEndEvent,
-downloadEpisodePendingEvent: DownloadEpisodePendingEvent,
-downloadEpisodeStartEvent: DownloadEpisodeStartEvent,
+downloadChapterEndEvent: DownloadChapterEndEvent,
+downloadChapterPendingEvent: DownloadChapterPendingEvent,
+downloadChapterStartEvent: DownloadChapterStartEvent,
 downloadImageErrorEvent: DownloadImageErrorEvent,
 downloadImageSuccessEvent: DownloadImageSuccessEvent,
-removeWatermarkEndEvent: RemoveWatermarkEndEvent,
-removeWatermarkErrorEvent: RemoveWatermarkErrorEvent,
-removeWatermarkStartEvent: RemoveWatermarkStartEvent,
-removeWatermarkSuccessEvent: RemoveWatermarkSuccessEvent
+downloadSpeedEvent: DownloadSpeedEvent,
+updateOverallDownloadProgressEvent: UpdateOverallDownloadProgressEvent
 }>({
-downloadEpisodeEndEvent: "download-episode-end-event",
-downloadEpisodePendingEvent: "download-episode-pending-event",
-downloadEpisodeStartEvent: "download-episode-start-event",
+downloadChapterEndEvent: "download-chapter-end-event",
+downloadChapterPendingEvent: "download-chapter-pending-event",
+downloadChapterStartEvent: "download-chapter-start-event",
 downloadImageErrorEvent: "download-image-error-event",
 downloadImageSuccessEvent: "download-image-success-event",
-removeWatermarkEndEvent: "remove-watermark-end-event",
-removeWatermarkErrorEvent: "remove-watermark-error-event",
-removeWatermarkStartEvent: "remove-watermark-start-event",
-removeWatermarkSuccessEvent: "remove-watermark-success-event"
+downloadSpeedEvent: "download-speed-event",
+updateOverallDownloadProgressEvent: "update-overall-download-progress-event"
 })
 
 /** user-defined constants **/
@@ -151,41 +128,39 @@ removeWatermarkSuccessEvent: "remove-watermark-success-event"
 
 /** user-defined types **/
 
-export type Banner = { icon: string; title: string; url: string }
+export type Album = { id: number; name: string; addtime: string; description: string; total_views: string; likes: string; chapterInfos: ChapterInfo[]; series_id: string; comment_total: string; author: string[]; tags: string[]; works: string[]; actors: string[]; related_list: RelatedListRespData[]; liked: boolean; is_favorite: boolean; is_aids: boolean }
+export type AlbumInFavoriteRespData = { id: string; author: string; description: string | null; name: string; latest_ep: string | null; latest_ep_aid: string | null; image: string; category: CategoryRespData; category_sub: CategorySubRespData }
+export type AlbumInSearchRespData = { id: string; author: string; name: string; image: string; category: CategoryRespData; category_sub: CategorySubRespData; liked: boolean; is_favorite: boolean; update_at: number }
+export type CategoryRespData = { id: string; title: string }
+export type CategorySubRespData = { id: string | null; title: string | null }
+export type ChapterInfo = { chapterId: number; chapterTitle: string; albumId: number; albumTitle: string; isDownloaded: boolean }
+export type ChapterRespData = { id: number; series: SeriesRespData[]; tags: string; name: string; images: string[]; addtime: string; series_id: string; is_favorite: boolean; liked: boolean }
 export type CommandError = string
-export type CommandResponse<T> = { code: number; msg: string; data: T }
-export type Config = { outputDir: string; outputFormat: ImageFormat; outputOptimize: boolean; biliCookie: string }
-export type CookieStatusData = { isLogin: boolean }
-export type DownloadEpisodeEndEvent = DownloadEpisodeEndEventPayload
-export type DownloadEpisodeEndEventPayload = { epId: number; errMsg: string | null }
-export type DownloadEpisodePendingEvent = DownloadEpisodePendingEventPayload
-export type DownloadEpisodePendingEventPayload = { epId: number; title: string }
-export type DownloadEpisodeStartEvent = DownloadEpisodeStartEventPayload
-export type DownloadEpisodeStartEventPayload = { epId: number; title: string; total: number }
+export type Config = { username: string; password: string; avs: string; downloadDir: string; downloadFormat: DownloadFormat }
+export type DownloadChapterEndEvent = DownloadChapterEndEventPayload
+export type DownloadChapterEndEventPayload = { chapterId: number; errMsg: string | null }
+export type DownloadChapterPendingEvent = DownloadChapterPendingEventPayload
+export type DownloadChapterPendingEventPayload = { chapterId: number; title: string }
+export type DownloadChapterStartEvent = DownloadChapterStartEventPayload
+export type DownloadChapterStartEventPayload = { chapterId: number; title: string; total: number }
+export type DownloadFormat = "Jpeg" | "Png" | "Webp"
 export type DownloadImageErrorEvent = DownloadImageErrorEventPayload
-export type DownloadImageErrorEventPayload = { epId: number; url: string; errMsg: string }
+export type DownloadImageErrorEventPayload = { chapterId: number; url: string; errMsg: string }
 export type DownloadImageSuccessEvent = DownloadImageSuccessEventPayload
-export type DownloadImageSuccessEventPayload = { epId: number; url: string; current: number }
-export type Episode = { epId: number; epTitle: string; comicId: number; comicTitle: string; isLocked: boolean; isDownloaded: boolean }
-export type ImageFormat = "Jpeg" | "Png"
-export type JpgImageData = { info: JpgImageInfo; base64: string }
-export type JpgImageInfo = { width: number; height: number; path: string }
-export type List = { id: number; title: string; org_title: string; horizontal_cover: string; square_cover: string; vertical_cover: string; author_name: string[]; styles: string[]; is_finish: number; allow_wait_free: boolean; discount_type: number; type: number; wiki: Wiki; numbers: number; jump_value: string; real_title: string }
-export type MangaDirData = { width: number; height: number; count: number; blackBackground: JpgImageData | null; whiteBackground: JpgImageData | null }
-export type QrCodeData = { base64: string; qrcodeKey: string }
-export type QrCodeStatusData = { url: string; refresh_token: string; timestamp: number; code: number; message: string }
-export type Recommend = { id: number; title: string; horizontal_cover: string; square_cover: string; vertical_cover: string; last_short_title: string; recommendation: string; is_finish: number; total: number; allow_wait_free: boolean; author_name: string[]; styles: string[]; discount_type: number }
-export type RectData = { left: number; top: number; right: number; bottom: number }
-export type RemoveWatermarkEndEvent = RemoveWatermarkEndEventPayload
-export type RemoveWatermarkEndEventPayload = { dirPath: string }
-export type RemoveWatermarkErrorEvent = RemoveWatermarkErrorEventPayload
-export type RemoveWatermarkErrorEventPayload = { dirPath: string; imgPath: string; errMsg: string }
-export type RemoveWatermarkStartEvent = RemoveWatermarkStartEventPayload
-export type RemoveWatermarkStartEventPayload = { dirPath: string; total: number }
-export type RemoveWatermarkSuccessEvent = RemoveWatermarkSuccessEventPayload
-export type RemoveWatermarkSuccessEventPayload = { dirPath: string; imgPath: string; current: number }
-export type SearchData = { list: List[]; total_page: number; total_num: number; recommends: Recommend[]; similar: string; se_id: string; banner: Banner }
-export type Wiki = { id: number; title: string; origin_title: string; vertical_cover: string; producer: string; author_name: string[]; publish_time: string; frequency: string }
+export type DownloadImageSuccessEventPayload = { chapterId: number; url: string; downloadedCount: number }
+export type DownloadSpeedEvent = DownloadSpeedEventPayload
+export type DownloadSpeedEventPayload = { speed: string }
+export type FavoriteFolderRespData = { FID: string; UID: string; name: string }
+export type FavoriteRespData = { list: AlbumInFavoriteRespData[]; folder_list: FavoriteFolderRespData[]; total: string; count: number }
+export type FavoriteSort = "FavoriteTime" | "UpdateTime"
+export type RelatedListRespData = { id: string; author: string; name: string; image: string }
+export type SearchRespData = { search_query: string; total: number; content: AlbumInSearchRespData[] }
+export type SearchResult = { SearchRespData: SearchRespData } | { Album: Album }
+export type SearchSort = "Latest" | "View" | "Picture" | "Like"
+export type SeriesRespData = { id: string; name: string; sort: string }
+export type UpdateOverallDownloadProgressEvent = UpdateOverallDownloadProgressEventPayload
+export type UpdateOverallDownloadProgressEventPayload = { downloadedImageCount: number; totalImageCount: number; percentage: number }
+export type UserProfileRespData = { uid: string; username: string; email: string; emailverified: string; photo: string; fname: string; gender: string; message: string | null; coin: number; album_favorites: number; s: string; level_name: string; level: number; nextLevelExp: number; exp: string; expPercent: number; album_favorites_max: number; ad_free: boolean; charge: string; jar: string; invitation_qrcode: string; invitation_url: string; invited_cnt: string }
 
 /** tauri-specta globals **/
 
@@ -203,7 +178,7 @@ type __EventObj__<T> = {
 	once: (
 		cb: TAURI_API_EVENT.EventCallback<T>,
 	) => ReturnType<typeof TAURI_API_EVENT.once<T>>;
-	emit: T extends null
+	emit: null extends T
 		? (payload?: T) => ReturnType<typeof TAURI_API_EVENT.emit>
 		: (payload: T) => ReturnType<typeof TAURI_API_EVENT.emit>;
 };
