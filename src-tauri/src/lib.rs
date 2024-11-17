@@ -1,27 +1,26 @@
-use anyhow::Context;
-use tauri::{Manager, Wry};
-
-// TODO: 用prelude来消除警告
-use crate::commands::*;
-use crate::config::Config;
-use crate::events::prelude::*;
-
+mod bili_client;
 mod commands;
 mod config;
 mod download_manager;
 mod errors;
 mod events;
 mod extensions;
-mod jm_client;
 mod responses;
 mod types;
 mod utils;
+
+use crate::commands::*;
+use crate::config::Config;
+use crate::download_manager::DownloadManager;
+use crate::events::prelude::*;
+use anyhow::Context;
+use parking_lot::RwLock;
+use tauri::{Manager, Wry};
 
 fn generate_context() -> tauri::Context<Wry> {
     tauri::generate_context!()
 }
 
-// TODO: 添加Panic Doc
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let builder = tauri_specta::Builder::<Wry>::new()
@@ -29,25 +28,30 @@ pub fn run() {
             greet,
             get_config,
             save_config,
-            login,
+            generate_app_qrcode,
+            get_app_qrcode_status,
+            generate_web_qrcode,
+            get_web_qrcode_status,
+            confirm_app_qrcode,
             search,
-            get_album,
-            get_chapter,
-            get_scramble_id,
-            get_favorite_folder,
-            get_user_profile,
-            download_chapters,
+            get_comic,
+            get_album_plus,
+            download_episodes,
+            download_album_plus_items,
             show_path_in_file_manager,
-            sync_favorite_folder,
+            get_user_profile,
         ])
         .events(tauri_specta::collect_events![
-            DownloadChapterEndEvent,
-            DownloadChapterPendingEvent,
-            DownloadChapterStartEvent,
-            DownloadImageErrorEvent,
+            RemoveWatermarkStartEvent,
+            RemoveWatermarkSuccessEvent,
+            RemoveWatermarkErrorEvent,
+            RemoveWatermarkEndEvent,
+            DownloadPendingEvent,
+            DownloadStartEvent,
             DownloadImageSuccessEvent,
+            DownloadImageErrorEvent,
+            DownloadEndEvent,
             DownloadSpeedEvent,
-            UpdateOverallDownloadProgressEvent,
         ]);
 
     #[cfg(debug_assertions)]
@@ -77,13 +81,14 @@ pub fn run() {
                 .context(format!("failed to create app data dir: {app_data_dir:?}"))?;
             println!("app data dir: {app_data_dir:?}");
 
-            let config = std::sync::RwLock::new(Config::new(app.handle())?);
-            let jm_client = jm_client::JmClient::new(app.handle().clone());
-            let download_manager = download_manager::DownloadManager::new(app.handle().clone());
-
+            let config = RwLock::new(Config::new(app.handle())?);
             app.manage(config);
-            app.manage(jm_client);
+
+            let download_manager = DownloadManager::new(app.handle());
             app.manage(download_manager);
+
+            let bili_client = bili_client::BiliClient::new(app.handle().clone());
+            app.manage(bili_client);
 
             Ok(())
         })

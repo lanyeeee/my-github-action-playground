@@ -1,5 +1,5 @@
 [package]
-name = "jmcomic-downloader"
+name = "bilibili-manga-downloader"
 version = "0.1.0"
 description = "A Tauri App"
 authors = ["you"]
@@ -8,39 +8,46 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
-name = "jmcomic_downloader_lib"
+# The `_lib` suffix may seem redundant but it is necessary
+# to make the lib name unique and wouldn't conflict with the bin name.
+# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
+name = "bilibili_manga_downloader_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
-tauri-build = { version = "2.0.0-rc", features = [] }
+tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2.0.0-rc", features = ["devtools"] }
-tauri-plugin-shell = { version = "2.0.0-rc" }
-tauri-plugin-dialog = { version = "2.0.0-rc" }
+tauri = { version = "2", features = [] }
+tauri-plugin-shell = { version = "2" }
+tauri-plugin-dialog = { version = "2" }
 
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1" }
-serde-aux = { version = "4.5.0" }
+yaserde = { version = "0.11.2", features = ["yaserde_derive"] }
 
 specta = { version = "2.0.0-rc" }
 tauri-specta = { version = "2.0.0-rc", features = ["derive", "typescript"] }
 specta-typescript = { version = "0.0.7" }
 
-reqwest = { version = "0.12", features = ["rustls-tls", "json", "__internal_proxy_sys_no_cache"], default-features = false }
+reqwest = { version = "0.12.8" }
 reqwest-retry = { version = "0.6.1" }
 reqwest-middleware = { version = "0.3.3 " }
 
-base64 = { version = "0.22" }
-md5 = { version = "0.7.0" }
-aes = { version = "0.8.4" }
+image = { version = "0.25.4", default-features = false, features = ["jpeg"] }
+base64 = { version = "0.22.1" }
 
-anyhow = { version = "1" }
-tokio = { version = "1.40.0", features = ["full"] }
-bytes = { version = "1.7.2" }
-image = { version = "0.25.2", default-features = false, features = ["jpeg", "png", "webp"] }
+anyhow = { version = "1.0.91" }
+qrcode = { version = "0.14.1" }
+bytes = { version = "1.8.0" }
+tokio = { version = "1.41.0", features = ["full"] }
 showfile = { version = "0.1.1" }
 path-slash = { version = "0.2.1" }
+url = { version = "2.5.2" }
+md5 = { version = "0.7.0" }
+chrono = { version = "0.4.38" }
+zip = { version = "2.2.0", default-features = false }
+parking_lot = { version = "0.12.3", features = ["send_guard"] }
 
 [profile.release]
 strip = true
