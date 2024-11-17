@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    jmcomic_downloader_lib::run()
+    bilibili_manga_downloader_lib::run()
 }

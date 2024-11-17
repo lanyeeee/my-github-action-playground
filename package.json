@@ -1,5 +1,5 @@
 {
-  "name": "jmcomic-downloader",
+  "name": "bilibili-manga-downloader",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -10,23 +10,21 @@
     "tauri": "tauri"
   },
   "dependencies": {
-    "@tauri-apps/api": ">=2.0.0-rc.0",
-    "@tauri-apps/plugin-dialog": "2.0.0-rc.1",
-    "@tauri-apps/plugin-shell": ">=2.0.0-rc.0",
-    "@viselect/vanilla": "^3.5.1",
-    "@viselect/vue": "^3.5.1",
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-dialog": "^2.0.1",
+    "@tauri-apps/plugin-shell": "^2",
+    "@viselect/vue": "^3.6.0",
     "naive-ui": "^2.40.1",
-    "unocss": "^0.63.0",
+    "unocss": "^0.63.6",
     "unplugin-auto-import": "^0.18.3",
     "unplugin-vue-components": "^0.27.4",
     "vue": "^3.3.4"
   },
   "devDependencies": {
-    "@tauri-apps/cli": ">=2.0.0-rc.0",
+    "@tauri-apps/cli": "^2",
     "@vitejs/plugin-vue": "^5.0.5",
     "typescript": "^5.2.2",
     "vite": "^5.3.1",
     "vue-tsc": "^2.0.22"
-  },
-  "packageManager": "pnpm@9.5.0"
+  }
 }

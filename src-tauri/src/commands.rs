@@ -1,18 +1,20 @@
 use std::path::PathBuf;
-use std::sync::RwLock;
 
-// TODO: 用`#![allow(clippy::used_underscore_binding)]`来消除警告
 use anyhow::anyhow;
+use parking_lot::RwLock;
 use path_slash::PathBufExt;
 use tauri::{AppHandle, State};
 
+use crate::bili_client::BiliClient;
 use crate::config::Config;
 use crate::download_manager::DownloadManager;
 use crate::errors::CommandResult;
-use crate::extensions::IgnoreRwLockPoison;
-use crate::jm_client::JmClient;
-use crate::responses::{ChapterRespData, FavoriteRespData, UserProfileRespData};
-use crate::types::{Album, ChapterInfo, FavoriteSort, SearchResult, SearchSort};
+use crate::responses::{
+    ConfirmAppQrcodeRespData, SearchRespData, UserProfileRespData, WebQrcodeStatusRespData,
+};
+use crate::types::{
+    AlbumPlus, AlbumPlusItem, AppQrcodeData, AppQrcodeStatus, Comic, EpisodeInfo, WebQrcodeData,
+};
 
 #[tauri::command]
 #[specta::specta]
@@ -24,7 +26,7 @@ pub fn greet(name: &str) -> String {
 #[specta::specta]
 #[allow(clippy::needless_pass_by_value)]
 pub fn get_config(config: State<RwLock<Config>>) -> Config {
-    config.read().unwrap().clone()
+    config.read().clone()
 }
 
 #[tauri::command(async)]
@@ -35,97 +37,121 @@ pub fn save_config(
     config_state: State<RwLock<Config>>,
     config: Config,
 ) -> CommandResult<()> {
-    let mut config_state = config_state.write_or_panic();
+    let mut config_state = config_state.write();
     *config_state = config;
     config_state.save(&app)?;
     Ok(())
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 #[specta::specta]
-pub async fn login(
-    jm_client: State<'_, JmClient>,
-    username: String,
-    password: String,
-) -> CommandResult<UserProfileRespData> {
-    let user_profile = jm_client.login(&username, &password).await?;
-    Ok(user_profile)
+pub async fn generate_app_qrcode(
+    bili_client: State<'_, BiliClient>,
+) -> CommandResult<AppQrcodeData> {
+    let app_qrcode_data = bili_client.generate_app_qrcode().await?;
+    Ok(app_qrcode_data)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
+#[specta::specta]
+pub async fn get_app_qrcode_status(
+    bili_client: State<'_, BiliClient>,
+    auth_code: String,
+) -> CommandResult<AppQrcodeStatus> {
+    let app_qrcode_status = bili_client.get_app_qrcode_status(auth_code).await?;
+    Ok(app_qrcode_status)
+}
+
+#[tauri::command(async)]
+#[specta::specta]
+pub async fn generate_web_qrcode(
+    bili_client: State<'_, BiliClient>,
+) -> CommandResult<WebQrcodeData> {
+    let web_qrcode_data = bili_client.generate_web_qrcode().await?;
+    Ok(web_qrcode_data)
+}
+
+#[tauri::command(async)]
+#[specta::specta]
+pub async fn get_web_qrcode_status(
+    bili_client: State<'_, BiliClient>,
+    qrcode_key: String,
+) -> CommandResult<WebQrcodeStatusRespData> {
+    let web_qrcode_status = bili_client.get_web_qrcode_status(&qrcode_key).await?;
+    Ok(web_qrcode_status)
+}
+
+#[tauri::command(async)]
+#[specta::specta]
+pub async fn confirm_app_qrcode(
+    bili_client: State<'_, BiliClient>,
+    auth_code: String,
+    sessdata: String,
+    csrf: String,
+) -> CommandResult<ConfirmAppQrcodeRespData> {
+    let confirm_app_qrcode_resp_data = bili_client
+        .confirm_app_qrcode(&auth_code, &sessdata, &csrf)
+        .await?;
+    Ok(confirm_app_qrcode_resp_data)
+}
+
+#[tauri::command(async)]
 #[specta::specta]
 pub async fn get_user_profile(
-    jm_client: State<'_, JmClient>,
+    bili_client: State<'_, BiliClient>,
 ) -> CommandResult<UserProfileRespData> {
-    let user_profile = jm_client.get_user_profile().await?;
-    Ok(user_profile)
+    let user_profile_resp_data = bili_client.get_user_profile().await?;
+    Ok(user_profile_resp_data)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 #[specta::specta]
 pub async fn search(
-    app: AppHandle,
-    jm_client: State<'_, JmClient>,
-    keyword: String,
-    page: i64,
-    sort: SearchSort,
-) -> CommandResult<SearchResult> {
-    let search_resp = jm_client.search(&keyword, page, sort).await?;
-    let search_result = SearchResult::from_search_resp(&app, search_resp);
-
-    Ok(search_result)
-}
-
-#[tauri::command]
-#[specta::specta]
-pub async fn get_album(
-    app: AppHandle,
-    jm_client: State<'_, JmClient>,
-    aid: i64,
-) -> CommandResult<Album> {
-    let album_resp_data = jm_client.get_album(aid).await?;
-    let album = Album::from_album_resp_data(&app, album_resp_data);
-    Ok(album)
-}
-
-#[tauri::command]
-#[specta::specta]
-pub async fn get_chapter(
-    jm_client: State<'_, JmClient>,
-    id: i64,
-) -> CommandResult<ChapterRespData> {
-    // TODO: 变量名改为chapter_resp_data
-    let chapter = jm_client.get_chapter(id).await?;
-    Ok(chapter)
-}
-
-#[tauri::command]
-#[specta::specta]
-pub async fn get_scramble_id(jm_client: State<'_, JmClient>, id: i64) -> CommandResult<i64> {
-    let scramble_id = jm_client.get_scramble_id(id).await?;
-    Ok(scramble_id)
+    bili_client: State<'_, BiliClient>,
+    keyword: &str,
+    page_num: i64,
+) -> CommandResult<SearchRespData> {
+    let search_resp_data = bili_client.search(keyword, page_num).await?;
+    Ok(search_resp_data)
 }
 
 #[tauri::command(async)]
 #[specta::specta]
-pub async fn get_favorite_folder(
-    jm_client: State<'_, JmClient>,
-    folder_id: i64,
-    page: i64,
-    sort: FavoriteSort,
-) -> CommandResult<FavoriteRespData> {
-    let favorite_resp_data = jm_client.get_favorite_folder(folder_id, page, sort).await?;
-    Ok(favorite_resp_data)
+pub async fn get_comic(bili_client: State<'_, BiliClient>, comic_id: i64) -> CommandResult<Comic> {
+    let comic = bili_client.get_comic(comic_id).await?;
+    Ok(comic)
 }
 
 #[tauri::command(async)]
 #[specta::specta]
-pub async fn download_chapters(
+pub async fn get_album_plus(
+    bili_client: State<'_, BiliClient>,
+    comic_id: i64,
+) -> CommandResult<AlbumPlus> {
+    let album_plus = bili_client.get_album_plus(comic_id).await?;
+    Ok(album_plus)
+}
+
+#[tauri::command(async)]
+#[specta::specta]
+pub async fn download_episodes(
     download_manager: State<'_, DownloadManager>,
-    chapter_infos: Vec<ChapterInfo>,
+    episodes: Vec<EpisodeInfo>,
 ) -> CommandResult<()> {
-    for chapter_info in chapter_infos {
-        download_manager.submit_chapter(chapter_info).await?;
+    for ep in episodes {
+        download_manager.submit_episode(ep).await?;
+    }
+    Ok(())
+}
+
+#[tauri::command(async)]
+#[specta::specta]
+pub async fn download_album_plus_items(
+    download_manager: State<'_, DownloadManager>,
+    items: Vec<AlbumPlusItem>,
+) -> CommandResult<()> {
+    for item in items {
+        download_manager.submit_album_plus(item).await?;
     }
     Ok(())
 }
@@ -138,21 +164,5 @@ pub fn show_path_in_file_manager(path: &str) -> CommandResult<()> {
         return Err(anyhow!("路径`{path:?}`不存在").into());
     }
     showfile::show_path_in_file_manager(path);
-    Ok(())
-}
-
-#[tauri::command(async)]
-#[specta::specta]
-pub async fn sync_favorite_folder(jm_client: State<'_, JmClient>) -> CommandResult<()> {
-    // 同步收藏夹的方式是随便收藏一个漫画
-    // 调用两次toggle是因为要把新收藏的漫画取消收藏
-    let task1 = jm_client.toggle_favorite_album(468_984);
-    let task2 = jm_client.toggle_favorite_album(468_984);
-    let (resp1, resp2) = tokio::try_join!(task1, task2)?;
-    if resp1.toggle_type == resp2.toggle_type {
-        let toggle_type = resp1.toggle_type;
-        return Err(anyhow!("同步收藏夹失败，两个请求都是`{toggle_type:?}`操作，请重试").into());
-    }
-
     Ok(())
 }

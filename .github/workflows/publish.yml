@@ -6,7 +6,7 @@ on:
       - "v*"
 
 env:
-  REPO_NAME: jmcomic-downloader
+  REPO_NAME: bilibili-manga-downloader
 
 jobs:
   get-version:
