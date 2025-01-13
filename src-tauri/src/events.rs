@@ -1,106 +1,113 @@
-use std::path::PathBuf;
-
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use tauri_specta::Event;
 
-pub mod prelude {
-    pub use crate::events::{
-        DownloadEndEvent, DownloadImageErrorEvent, DownloadImageSuccessEvent, DownloadPendingEvent,
-        DownloadSpeedEvent, DownloadStartEvent, RemoveWatermarkEndEvent, RemoveWatermarkErrorEvent,
-        RemoveWatermarkStartEvent, RemoveWatermarkSuccessEvent,
-    };
+#[derive(Debug, Clone, Serialize, Deserialize, Type, Event)]
+#[serde(tag = "event", content = "data")]
+pub enum DownloadEvent {
+    #[serde(rename_all = "camelCase")]
+    ChapterPending {
+        chapter_uuid: String,
+        comic_title: String,
+        chapter_title: String,
+    },
+
+    #[serde(rename_all = "camelCase")]
+    ChapterControlRisk {
+        chapter_uuid: String,
+        retry_after: u32,
+    },
+
+    #[serde(rename_all = "camelCase")]
+    ChapterStart { chapter_uuid: String, total: u32 },
+
+    #[serde(rename_all = "camelCase")]
+    ChapterEnd {
+        chapter_uuid: String,
+        err_msg: Option<String>,
+    },
+
+    #[serde(rename_all = "camelCase")]
+    ImageSuccess {
+        chapter_uuid: String,
+        url: String,
+        current: u32,
+    },
+
+    #[serde(rename_all = "camelCase")]
+    ImageError {
+        chapter_uuid: String,
+        url: String,
+        err_msg: String,
+    },
+
+    #[serde(rename_all = "camelCase")]
+    OverallUpdate {
+        downloaded_image_count: u32,
+        total_image_count: u32,
+        percentage: f64,
+    },
+
+    #[serde(rename_all = "camelCase")]
+    OverallSpeed { speed: String },
 }
 
-#[derive(Serialize, Deserialize, Clone, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct RemoveWatermarkStartEventPayload {
-    pub dir_path: PathBuf,
-    pub total: u32,
-}
-#[derive(Serialize, Deserialize, Clone, Type, Event)]
-pub struct RemoveWatermarkStartEvent(pub RemoveWatermarkStartEventPayload);
+#[derive(Debug, Clone, Serialize, Deserialize, Type, Event)]
+#[serde(tag = "event", content = "data")]
+pub enum ExportCbzEvent {
+    #[serde(rename_all = "camelCase")]
+    Start {
+        uuid: String,
+        comic_title: String,
+        total: u32,
+    },
 
-#[derive(Serialize, Deserialize, Clone, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct RemoveWatermarkSuccessEventPayload {
-    pub dir_path: PathBuf,
-    pub img_path: PathBuf,
-    pub current: u32,
-}
-#[derive(Serialize, Deserialize, Clone, Type, Event)]
-pub struct RemoveWatermarkSuccessEvent(pub RemoveWatermarkSuccessEventPayload);
+    #[serde(rename_all = "camelCase")]
+    Progress { uuid: String, current: u32 },
 
-#[derive(Serialize, Deserialize, Clone, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct RemoveWatermarkErrorEventPayload {
-    pub dir_path: PathBuf,
-    pub img_path: PathBuf,
-    pub err_msg: String,
+    #[serde(rename_all = "camelCase")]
+    End { uuid: String },
 }
-#[derive(Serialize, Deserialize, Clone, Type, Event)]
-pub struct RemoveWatermarkErrorEvent(pub RemoveWatermarkErrorEventPayload);
 
-#[derive(Serialize, Deserialize, Clone, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct RemoveWatermarkEndEventPayload {
-    pub dir_path: PathBuf,
-}
-#[derive(Serialize, Deserialize, Clone, Type, Event)]
-pub struct RemoveWatermarkEndEvent(pub RemoveWatermarkEndEventPayload);
+#[derive(Debug, Clone, Serialize, Deserialize, Type, Event)]
+#[serde(tag = "event", content = "data")]
+pub enum ExportPdfEvent {
+    #[serde(rename_all = "camelCase")]
+    CreateStart {
+        uuid: String,
+        comic_title: String,
+        total: u32,
+    },
 
-#[derive(Serialize, Deserialize, Clone, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct DownloadPendingEventPayload {
-    pub id: i64,
-    pub title: String,
-}
-#[derive(Serialize, Deserialize, Clone, Type, Event)]
-pub struct DownloadPendingEvent(pub DownloadPendingEventPayload);
+    #[serde(rename_all = "camelCase")]
+    CreateProgress { uuid: String, current: u32 },
 
-#[derive(Serialize, Deserialize, Clone, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct DownloadStartEventPayload {
-    pub id: i64,
-    pub title: String,
-    pub total: u32,
-}
-#[derive(Serialize, Deserialize, Clone, Type, Event)]
-pub struct DownloadStartEvent(pub DownloadStartEventPayload);
+    #[serde(rename_all = "camelCase")]
+    CreateEnd { uuid: String },
 
-#[derive(Serialize, Deserialize, Clone, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct DownloadImageSuccessEventPayload {
-    pub id: i64,
-    pub url: String,
-    pub current: u32,
-}
-#[derive(Serialize, Deserialize, Clone, Type, Event)]
-pub struct DownloadImageSuccessEvent(pub DownloadImageSuccessEventPayload);
+    #[serde(rename_all = "camelCase")]
+    MergeStart {
+        uuid: String,
+        comic_title: String,
+        total: u32,
+    },
 
-#[derive(Serialize, Deserialize, Clone, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct DownloadImageErrorEventPayload {
-    pub id: i64,
-    pub url: String,
-    pub err_msg: String,
-}
-#[derive(Serialize, Deserialize, Clone, Type, Event)]
-pub struct DownloadImageErrorEvent(pub DownloadImageErrorEventPayload);
+    #[serde(rename_all = "camelCase")]
+    MergeProgress { uuid: String, current: u32 },
 
-#[derive(Serialize, Deserialize, Clone, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct DownloadEndEventPayload {
-    pub id: i64,
-    pub err_msg: Option<String>,
+    #[serde(rename_all = "camelCase")]
+    MergeEnd { uuid: String },
 }
-#[derive(Serialize, Deserialize, Clone, Type, Event)]
-pub struct DownloadEndEvent(pub DownloadEndEventPayload);
 
-#[derive(Serialize, Deserialize, Clone, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct DownloadSpeedEventPayload {
-    pub speed: String,
+#[derive(Debug, Clone, Serialize, Deserialize, Type, Event)]
+#[serde(tag = "event", content = "data")]
+pub enum UpdateDownloadedComicsEvent {
+    #[serde(rename_all = "camelCase")]
+    GettingComics { total: i64 },
+
+    #[serde(rename_all = "camelCase")]
+    ComicGot { current: i64, total: i64 },
+
+    #[serde(rename_all = "camelCase")]
+    DownloadTaskCreated,
 }
-#[derive(Serialize, Deserialize, Clone, Type, Event)]
-pub struct DownloadSpeedEvent(pub DownloadSpeedEventPayload);

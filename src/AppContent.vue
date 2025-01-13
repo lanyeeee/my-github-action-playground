@@ -1,104 +1,120 @@
 <script setup lang="ts">
-import {Comic, commands, Config, UserProfileRespData} from "./bindings.ts";
-import {onMounted, ref, watch} from "vue";
-import {useMessage, useNotification} from "naive-ui";
-import QrcodeViewer from "./components/QrcodeViewer.vue";
-import DownloadingList from "./components/DownloadingList.vue";
-import SearchPane from "./components/SearchPane.vue";
-import EpisodePane from "./components/EpisodePane.vue";
-import CookieLoginDialog from "./components/CookieLoginDialog.vue";
+import { onMounted, ref, watch } from 'vue'
+import { Comic, commands, Config, UserProfileRespData } from './bindings.ts'
+import { useMessage, useNotification } from 'naive-ui'
+import LoginDialog from './components/LoginDialog.vue'
+import SearchPane from './panes/SearchPane.vue'
+import ChapterPane from './panes/ChapterPane.vue'
+import DownloadingPane from './panes/DownloadingPane.vue'
+import { appDataDir } from '@tauri-apps/api/path'
+import { path } from '@tauri-apps/api'
+import FavoritePane from './panes/FavoritePane.vue'
+import { CurrentTabName } from './types.ts'
+import DownloadedPane from './panes/DownloadedPane.vue'
 
-const notification = useNotification();
-const message = useMessage();
+const message = useMessage()
+const notification = useNotification()
 
-const config = ref<Config>();
-const qrcodeViewerShowing = ref<boolean>(false);
-const cookieLoginDialogShowing = ref<boolean>(false);
-const currentTabName = ref<"search" | "episode">("search");
-const selectedComic = ref<Comic>();
-const userProfile = ref<UserProfileRespData>();
+const config = ref<Config>()
+const userProfile = ref<UserProfileRespData>()
+const loginDialogShowing = ref<boolean>(false)
+const currentTabName = ref<CurrentTabName>('search')
+const pickedComic = ref<Comic>()
 
-watch(config, async () => {
-  if (config.value === undefined) {
-    return;
-  }
-  const result = await commands.saveConfig(config.value);
-  if (result.status === "error") {
-    notification.error({title: "保存配置失败", description: result.error});
-    return;
-  }
+watch(
+  config,
+  async () => {
+    if (config.value === undefined) {
+      return
+    }
+    await commands.saveConfig(config.value)
+    message.success('保存配置成功')
+  },
+  { deep: true },
+)
 
-  message.success("保存配置成功");
-}, {deep: true});
-
-watch(() => config.value?.accessToken, async () => {
-  if (config.value === undefined || config.value.accessToken === "") {
-    return;
-  }
-  const result = await commands.getUserProfile();
-  if (result.status === "error") {
-    notification.error({title: "获取用户信息失败", description: result.error});
-    userProfile.value = undefined;
-    return;
-  }
-  userProfile.value = result.data;
-  message.success("获取用户信息成功");
-});
+watch(
+  () => config.value?.token,
+  async () => {
+    if (config.value === undefined || config.value.token === '') {
+      return
+    }
+    const result = await commands.getUserProfile()
+    if (result.status === 'error') {
+      notification.error({ title: '获取用户信息失败', description: result.error })
+      userProfile.value = undefined
+      return
+    }
+    userProfile.value = result.data
+    message.success('获取用户信息成功')
+  },
+)
 
 onMounted(async () => {
   // 屏蔽浏览器右键菜单
   document.oncontextmenu = (event) => {
-    event.preventDefault();
-  };
+    event.preventDefault()
+  }
   // 获取配置
-  config.value = await commands.getConfig();
-});
+  config.value = await commands.getConfig()
+})
 
-async function test() {
-  notification.error({
-    title: "标题 标题 标题 标题 标题 标题 标题 标题 标题 标题 标题 标题 标题 标题 标题 标题 标题 标题 标题 标题 标题 标题 标题 标题 标题 标题 标题 标题 ",
-    description: "描述 描述 描述 描述 描述 描述 描述 描述 描述 描述 描述 描述 描述 描述 描述 描述 描述 描述 描述 描述 描述 描述 描述 描述 描述 描述 描述 描述 描述 描述 描述 描述 描述 描述 ",
-    content: "内容 内容 内容 内容 内容 内容 内容 内容 内容 内容 内容 内容 内容 内容 内容 内容 内容 内容 内容 内容 内容 内容 内容 内容 内容 内容 内容 内容 内容 ",
-  });
-
+async function showConfigInFileManager() {
+  const configName = 'config.json'
+  const configPath = await path.join(await appDataDir(), configName)
+  const result = await commands.showPathInFileManager(configPath)
+  if (result.status === 'error') {
+    notification.error({ title: '打开配置文件失败', description: result.error })
+  }
 }
 
+async function test() {
+  const result = await commands.updateDownloadedComics()
+  if (result.status === 'error') {
+    notification.error({ description: result.error })
+  }
+}
 </script>
 
 <template>
-  <div v-if="config!==undefined" class="h-screen flex flex-col">
-    <div class="flex flex-1 overflow-hidden">
-      <div class="basis-1/2 overflow-auto">
-        <n-tabs v-model:value="currentTabName" type="line" size="small" class="h-full">
-          <n-tab-pane class="h-full overflow-auto p-0!" name="search" tab="漫画搜索" display-directive="show">
-            <search-pane v-model:current-tab-name="currentTabName" v-model:selected-comic="selectedComic"/>
-          </n-tab-pane>
-          <n-tab-pane class="h-full overflow-auto p-0!" name="episode" tab="章节详情" display-directive="show">
-            <episode-pane v-model:selected-comic="selectedComic"/>
-          </n-tab-pane>
-        </n-tabs>
-      </div>
-      <div class="basis-1/2 flex flex-col overflow-hidden">
-        <div class="flex">
-          <n-button @click="qrcodeViewerShowing=true" type="primary">二维码登录</n-button>
-          <n-button @click="cookieLoginDialogShowing=true" type="primary" secondary>Cookie登录</n-button>
-          <n-button @click="test">测试用</n-button>
-          <div v-if="userProfile!==undefined" class="flex flex-justify-end">
-            <n-avatar round
-                      :img-props="{referrerpolicy: 'no-referrer'}"
-                      :size="32"
-                      :src="userProfile.face"/>
-            <span class="whitespace-nowrap">{{ userProfile.name }}</span>
-          </div>
-        </div>
-        <downloading-list class="h-full" v-model:config="config"></downloading-list>
+  <div v-if="config !== undefined" class="h-screen flex flex-col">
+    <div class="flex">
+      <n-input v-model:value="config.token" placeholder="" clearable>
+        <template #prefix>Token：</template>
+      </n-input>
+      <n-button type="primary" @click="loginDialogShowing = true">账号登录</n-button>
+      <n-button @click="showConfigInFileManager">打开配置目录</n-button>
+      <n-button @click="test">测试用</n-button>
+      <div v-if="userProfile !== undefined" class="flex flex-justify-end items-center">
+        <n-avatar round :size="32" :src="userProfile.avatar" />
+        <span class="whitespace-nowrap">{{ userProfile.nickname }}</span>
       </div>
     </div>
+    <div class="flex flex-1 overflow-hidden">
+      <n-tabs class="h-full basis-1/2" v-model:value="currentTabName" type="line" size="small">
+        <n-tab-pane class="h-full overflow-auto p-0!" name="search" tab="漫画搜索" display-directive="show:lazy">
+          <search-pane v-model:picked-comic="pickedComic" v-model:current-tab-name="currentTabName" />
+        </n-tab-pane>
+        <n-tab-pane class="h-full overflow-auto p-0!" name="favorite" tab="漫画收藏" display-directive="show:lazy">
+          <favorite-pane
+            :user-profile="userProfile"
+            v-model:picked-comic="pickedComic"
+            v-model:current-tab-name="currentTabName" />
+        </n-tab-pane>
+        <n-tab-pane class="h-full overflow-auto p-0!" name="downloaded" tab="本地库存" display-directive="show:lazy">
+          <downloaded-pane
+            v-model:config="config"
+            v-model:picked-comic="pickedComic"
+            v-model:current-tab-name="currentTabName" />
+        </n-tab-pane>
+        <n-tab-pane class="h-full overflow-auto p-0!" name="chapter" tab="章节详情" display-directive="show:lazy">
+          <chapter-pane v-model:picked-comic="pickedComic" />
+        </n-tab-pane>
+      </n-tabs>
+      <downloading-pane class="basis-1/2 overflow-auto" v-model:config="config"></downloading-pane>
+    </div>
+    <n-modal v-model:show="loginDialogShowing">
+      <login-dialog v-model:showing="loginDialogShowing" v-model:config="config" />
+    </n-modal>
   </div>
-  <n-modal preset="dialog" title="请使用BiliBili手机客户端扫描二维码登录" v-model:show="qrcodeViewerShowing">
-    <qrcode-viewer v-if="config!==undefined" v-model:showing="qrcodeViewerShowing" v-model:config="config"/>
-  </n-modal>
-  <n-modal v-model:show="cookieLoginDialogShowing">
-    <cookie-login-dialog v-if="config!==undefined" v-model:showing="cookieLoginDialogShowing" v-model:config="config"/>
-  </n-modal>
 </template>
