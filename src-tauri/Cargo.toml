@@ -1,5 +1,5 @@
 [package]
-name = "bilibili-manga-downloader"
+name = "copymanga-downloader"
 version = "0.1.0"
 description = "A Tauri App"
 authors = ["you"]
@@ -11,7 +11,7 @@ edition = "2021"
 # The `_lib` suffix may seem redundant but it is necessary
 # to make the lib name unique and wouldn't conflict with the bin name.
 # This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
-name = "bilibili_manga_downloader_lib"
+name = "copymanga_downloader_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
@@ -19,7 +19,7 @@ tauri-build = { version = "2", features = [] }
 
 [dependencies]
 tauri = { version = "2", features = [] }
-tauri-plugin-shell = { version = "2" }
+tauri-plugin-shell = "2"
 tauri-plugin-dialog = { version = "2" }
 
 serde = { version = "1", features = ["derive"] }
@@ -30,24 +30,25 @@ specta = { version = "2.0.0-rc" }
 tauri-specta = { version = "2.0.0-rc", features = ["derive", "typescript"] }
 specta-typescript = { version = "0.0.7" }
 
-reqwest = { version = "0.12.8" }
-reqwest-retry = { version = "0.6.1" }
-reqwest-middleware = { version = "0.3.3 " }
-
-image = { version = "0.25.4", default-features = false, features = ["jpeg"] }
-base64 = { version = "0.22.1" }
+reqwest = { version = "0.12.9", features = ["native-tls", "gzip"], default-features = false }
+reqwest-retry = { version = "0.7.0" }
+reqwest-middleware = { version = "0.4.0" }
 
 anyhow = { version = "1.0.91" }
-qrcode = { version = "0.14.1" }
-bytes = { version = "1.8.0" }
 tokio = { version = "1.41.0", features = ["full"] }
+parking_lot = { version = "0.12.3", features = ["send_guard"] }
+base64 = { version = "0.22" }
+bytes = { version = "1.8.0" }
+chrono = { version = "0.4.38" }
+fake = { version = "3.0.1" }
+rand = { version = "0.8.5" }
 showfile = { version = "0.1.1" }
 path-slash = { version = "0.2.1" }
-url = { version = "2.5.2" }
-md5 = { version = "0.7.0" }
-chrono = { version = "0.4.38" }
 zip = { version = "2.2.0", default-features = false }
-parking_lot = { version = "0.12.3", features = ["send_guard"] }
+rayon = { version = "1.10.0" }
+uuid = { version = "1.11.0" }
+lopdf = { git = "https://github.com/lanyeeee/lopdf", features = ["embed_image_jpeg"] }
+image = { version = "0.25.2", default-features = false, features = ["jpeg"] }
 
 [profile.release]
 strip = true

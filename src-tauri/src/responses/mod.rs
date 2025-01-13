@@ -1,34 +1,38 @@
-mod album_plus_resp_data;
-mod app_qrcode_status_resp_data;
-mod comic_resp_data;
-mod confirm_app_qrcode_resp_data;
-mod generate_app_qrcode_resp_data;
-mod generate_web_qrcode_resp_data;
-mod image_index_resp_data;
-mod image_token_resp_data;
+mod copy_resp;
+mod get_chapter_resp_data;
+mod get_chapters_resp_data;
+mod get_comic_resp_data;
+mod login_resp_data;
 mod search_resp_data;
 mod user_profile_resp_data;
-mod web_qrcode_status_resp_data;
+mod get_favorite_resp_data;
 
-pub use album_plus_resp_data::*;
-pub use app_qrcode_status_resp_data::*;
-pub use comic_resp_data::*;
-pub use confirm_app_qrcode_resp_data::*;
-pub use generate_app_qrcode_resp_data::*;
-pub use generate_web_qrcode_resp_data::*;
-pub use image_index_resp_data::*;
-pub use image_token_resp_data::*;
+pub use copy_resp::*;
+pub use get_chapter_resp_data::*;
+pub use get_chapters_resp_data::*;
+pub use get_comic_resp_data::*;
+pub use login_resp_data::*;
 pub use search_resp_data::*;
 pub use user_profile_resp_data::*;
-pub use web_qrcode_status_resp_data::*;
+pub use get_favorite_resp_data::*;
 
 use serde::{Deserialize, Serialize};
+use specta::Type;
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct BiliResp {
-    pub code: i64,
-    #[serde(default, alias = "message")]
-    pub msg: String,
-    pub data: Option<serde_json::Value>,
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[serde(default, rename_all = "camelCase")]
+pub struct Pagination<T> {
+    pub list: Vec<T>,
+    pub total: i64,
+    pub limit: i64,
+    pub offset: i64,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[serde(default, rename_all = "camelCase")]
+pub struct AuthorRespData {
+    pub name: String,
+    pub alias: Option<String>,
+    #[serde(rename = "path_word")]
+    pub path_word: String,
 }

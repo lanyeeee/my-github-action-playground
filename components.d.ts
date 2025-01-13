@@ -8,9 +8,8 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     ComicCard: typeof import('./src/components/ComicCard.vue')['default']
-    CookieLoginDialog: typeof import('./src/components/CookieLoginDialog.vue')['default']
-    DownloadingList: typeof import('./src/components/DownloadingList.vue')['default']
-    EpisodePane: typeof import('./src/components/EpisodePane.vue')['default']
+    DownloadedComicCard: typeof import('./src/components/DownloadedComicCard.vue')['default']
+    LoginDialog: typeof import('./src/components/LoginDialog.vue')['default']
     NAvatar: typeof import('naive-ui')['NAvatar']
     NButton: typeof import('naive-ui')['NButton']
     NCard: typeof import('naive-ui')['NCard']
@@ -26,11 +25,7 @@ declare module 'vue' {
     NModalProvider: typeof import('naive-ui')['NModalProvider']
     NNotificationProvider: typeof import('naive-ui')['NNotificationProvider']
     NPagination: typeof import('naive-ui')['NPagination']
-    NRadio: typeof import('naive-ui')['NRadio']
-    NRadioGroup: typeof import('naive-ui')['NRadioGroup']
     NTabPane: typeof import('naive-ui')['NTabPane']
     NTabs: typeof import('naive-ui')['NTabs']
-    QrcodeViewer: typeof import('./src/components/QrcodeViewer.vue')['default']
-    SearchPane: typeof import('./src/components/SearchPane.vue')['default']
   }
 }

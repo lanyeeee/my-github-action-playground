@@ -1,21 +1,27 @@
-mod bili_client;
+mod account_pool;
 mod commands;
 mod config;
+mod copy_client;
 mod download_manager;
 mod errors;
 mod events;
+mod export;
 mod extensions;
 mod responses;
 mod types;
 mod utils;
 
-use crate::commands::*;
-use crate::config::Config;
-use crate::download_manager::DownloadManager;
-use crate::events::prelude::*;
+use account_pool::AccountPool;
 use anyhow::Context;
+use copy_client::CopyClient;
+use download_manager::DownloadManager;
+use events::{DownloadEvent, ExportCbzEvent, ExportPdfEvent, UpdateDownloadedComicsEvent};
 use parking_lot::RwLock;
 use tauri::{Manager, Wry};
+use types::AsyncRwLock;
+
+use crate::commands::*;
+use crate::config::Config;
 
 fn generate_context() -> tauri::Context<Wry> {
     tauri::generate_context!()
@@ -28,30 +34,27 @@ pub fn run() {
             greet,
             get_config,
             save_config,
-            generate_app_qrcode,
-            get_app_qrcode_status,
-            generate_web_qrcode,
-            get_web_qrcode_status,
-            confirm_app_qrcode,
+            register,
+            login,
+            get_user_profile,
             search,
             get_comic,
-            get_album_plus,
-            download_episodes,
-            download_album_plus_items,
+            get_group_chapters,
+            get_chapter,
+            get_favorite,
+            download_chapters,
+            save_metadata,
+            get_downloaded_comics,
+            export_cbz,
+            export_pdf,
+            update_downloaded_comics,
             show_path_in_file_manager,
-            get_user_profile,
         ])
         .events(tauri_specta::collect_events![
-            RemoveWatermarkStartEvent,
-            RemoveWatermarkSuccessEvent,
-            RemoveWatermarkErrorEvent,
-            RemoveWatermarkEndEvent,
-            DownloadPendingEvent,
-            DownloadStartEvent,
-            DownloadImageSuccessEvent,
-            DownloadImageErrorEvent,
-            DownloadEndEvent,
-            DownloadSpeedEvent,
+            DownloadEvent,
+            ExportCbzEvent,
+            ExportPdfEvent,
+            UpdateDownloadedComicsEvent,
         ]);
 
     #[cfg(debug_assertions)]
@@ -66,8 +69,8 @@ pub fn run() {
         .expect("Failed to export typescript bindings");
 
     tauri::Builder::default()
-        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_dialog::init())
         .invoke_handler(builder.invoke_handler())
         .setup(move |app| {
             builder.mount_events(app);
@@ -84,11 +87,14 @@ pub fn run() {
             let config = RwLock::new(Config::new(app.handle())?);
             app.manage(config);
 
+            let copy_client = CopyClient::new(app.handle().clone());
+            app.manage(copy_client);
+
             let download_manager = DownloadManager::new(app.handle());
             app.manage(download_manager);
 
-            let bili_client = bili_client::BiliClient::new(app.handle().clone());
-            app.manage(bili_client);
+            let account_pool = AsyncRwLock::new(AccountPool::new(app.handle())?);
+            app.manage(account_pool);
 
             Ok(())
         })
