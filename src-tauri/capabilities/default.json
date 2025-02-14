@@ -8,6 +8,15 @@
   "permissions": [
     "core:default",
     "shell:allow-open",
-    "dialog:allow-open"
+    "dialog:allow-open",
+    "fs:default",
+    {
+      "identifier": "fs:scope",
+      "allow": [
+        {
+          "path": "$RESOURCE/**"
+        }
+      ]
+    }
   ]
 }
