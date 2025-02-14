@@ -6,7 +6,7 @@ import {
   presetUno,
   presetWebFonts,
   transformerDirectives,
-  transformerVariantGroup
+  transformerVariantGroup,
 } from 'unocss'
 
 export default defineConfig({
@@ -16,7 +16,7 @@ export default defineConfig({
   theme: {
     colors: {
       // ...
-    }
+    },
   },
   presets: [
     presetUno(),
@@ -26,11 +26,8 @@ export default defineConfig({
     presetWebFonts({
       fonts: {
         // ...
-      }
-    })
+      },
+    }),
   ],
-  transformers: [
-    transformerDirectives(),
-    transformerVariantGroup()
-  ]
+  transformers: [transformerDirectives(), transformerVariantGroup()],
 })

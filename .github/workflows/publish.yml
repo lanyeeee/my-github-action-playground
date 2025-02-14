@@ -6,7 +6,7 @@ on:
       - "v*"
 
 env:
-  REPO_NAME: copymanga-downloader
+  REPO_NAME: bilibili-manga-watermark-remover
 
 jobs:
   get-version:
