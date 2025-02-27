@@ -5,59 +5,8 @@
 
 
 export const commands = {
-async generateBackground(mangaDir: string, rectData: RectData | null, width: number, height: number) : Promise<Result<null, CommandError>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("generate_background", { mangaDir, rectData, width, height }) };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
-async removeWatermark(mangaDir: string, outputDir: string, format: ImageFormat, optimize: boolean, backgroundsData: ([JpgImageData, JpgImageData])[]) : Promise<Result<null, CommandError>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("remove_watermark", { mangaDir, outputDir, format, optimize, backgroundsData }) };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
-async openImage(path: string) : Promise<Result<JpgImageData, CommandError>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("open_image", { path }) };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
-async getMangaDirData(mangaDir: string) : Promise<Result<MangaDirData[], CommandError>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("get_manga_dir_data", { mangaDir }) };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
-async getJpgImageInfos(mangaDir: string) : Promise<JpgImageInfo[]> {
-    return await TAURI_INVOKE("get_jpg_image_infos", { mangaDir });
-},
-async showPathInFileManager(path: string) : Promise<void> {
-    await TAURI_INVOKE("show_path_in_file_manager", { path });
-},
-async getBackgroundDirRelativePath(mangaDir: string, width: number, height: number) : Promise<Result<string, CommandError>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("get_background_dir_relative_path", { mangaDir, width, height }) };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
-async getBackgroundDirAbsPath(mangaDir: string, width: number, height: number) : Promise<Result<string, CommandError>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("get_background_dir_abs_path", { mangaDir, width, height }) };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
+async greet(name: string) : Promise<string> {
+    return await TAURI_INVOKE("greet", { name });
 },
 async getConfig() : Promise<Config> {
     return await TAURI_INVOKE("get_config");
@@ -69,6 +18,129 @@ async saveConfig(config: Config) : Promise<Result<null, CommandError>> {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
+},
+async login(username: string, password: string) : Promise<Result<string, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("login", { username, password }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async getUserProfile() : Promise<Result<UserProfile, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_user_profile") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async search(keyword: string, pageNum: number) : Promise<Result<SearchResult, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("search", { keyword, pageNum }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async getComic(id: number) : Promise<Result<Comic, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_comic", { id }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async downloadChapters(chapters: ChapterInfo[]) : Promise<void> {
+    await TAURI_INVOKE("download_chapters", { chapters });
+},
+async getFavorite(pageNum: number) : Promise<Result<GetFavoriteResult, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_favorite", { pageNum }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async saveMetadata(comic: Comic) : Promise<Result<null, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("save_metadata", { comic }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async getDownloadedComics() : Promise<Result<Comic[], CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_downloaded_comics") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async exportCbz(comic: Comic) : Promise<Result<null, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("export_cbz", { comic }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async exportPdf(comic: Comic) : Promise<Result<null, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("export_pdf", { comic }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async updateDownloadedComics() : Promise<Result<null, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("update_downloaded_comics") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async getLogsDirSize() : Promise<Result<number, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_logs_dir_size") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async showPathInFileManager(path: string) : Promise<Result<null, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("show_path_in_file_manager", { path }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async pauseDownloadTask(chapterId: number) : Promise<Result<null, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("pause_download_task", { chapterId }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async resumeDownloadTask(chapterId: number) : Promise<Result<null, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("resume_download_task", { chapterId }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async cancelDownloadTask(chapterId: number) : Promise<Result<null, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("cancel_download_task", { chapterId }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 }
 }
 
@@ -76,15 +148,19 @@ async saveConfig(config: Config) : Promise<Result<null, CommandError>> {
 
 
 export const events = __makeEvents__<{
-removeWatermarkEndEvent: RemoveWatermarkEndEvent,
-removeWatermarkErrorEvent: RemoveWatermarkErrorEvent,
-removeWatermarkStartEvent: RemoveWatermarkStartEvent,
-removeWatermarkSuccessEvent: RemoveWatermarkSuccessEvent
+downloadEvent: DownloadEvent,
+downloadTaskEvent: DownloadTaskEvent,
+exportCbzEvent: ExportCbzEvent,
+exportPdfEvent: ExportPdfEvent,
+logEvent: LogEvent,
+updateDownloadedComicsEvent: UpdateDownloadedComicsEvent
 }>({
-removeWatermarkEndEvent: "remove-watermark-end-event",
-removeWatermarkErrorEvent: "remove-watermark-error-event",
-removeWatermarkStartEvent: "remove-watermark-start-event",
-removeWatermarkSuccessEvent: "remove-watermark-success-event"
+downloadEvent: "download-event",
+downloadTaskEvent: "download-task-event",
+exportCbzEvent: "export-cbz-event",
+exportPdfEvent: "export-pdf-event",
+logEvent: "log-event",
+updateDownloadedComicsEvent: "update-downloaded-comics-event"
 })
 
 /** user-defined constants **/
@@ -93,21 +169,192 @@ removeWatermarkSuccessEvent: "remove-watermark-success-event"
 
 /** user-defined types **/
 
-export type CommandError = string
-export type Config = { outputDir: string; outputFormat: ImageFormat; outputOptimize: boolean }
-export type ImageFormat = "Jpeg" | "Png"
-export type JpgImageData = { info: JpgImageInfo; base64: string }
-export type JpgImageInfo = { width: number; height: number; path: string }
-export type MangaDirData = { width: number; height: number; count: number; blackBackground: JpgImageData | null; whiteBackground: JpgImageData | null }
-export type RectData = { left: number; top: number; right: number; bottom: number }
-export type RemoveWatermarkEndEvent = RemoveWatermarkEndEventPayload
-export type RemoveWatermarkEndEventPayload = { dirPath: string }
-export type RemoveWatermarkErrorEvent = RemoveWatermarkErrorEventPayload
-export type RemoveWatermarkErrorEventPayload = { dirPath: string; imgPath: string; errMsg: string }
-export type RemoveWatermarkStartEvent = RemoveWatermarkStartEventPayload
-export type RemoveWatermarkStartEventPayload = { dirPath: string; total: number }
-export type RemoveWatermarkSuccessEvent = RemoveWatermarkSuccessEventPayload
-export type RemoveWatermarkSuccessEventPayload = { dirPath: string; imgPath: string; current: number }
+export type ChapterInfo = { 
+/**
+ * 章节id
+ */
+chapterId: number; 
+/**
+ * 章节标题
+ */
+chapterTitle: string; 
+/**
+ * 此章节有多少页
+ */
+chapterSize: number; 
+/**
+ * 以order为前缀的章节标题
+ */
+prefixedChapterTitle: string; 
+/**
+ * 漫画id
+ */
+comicId: number; 
+/**
+ * 漫画标题
+ */
+comicTitle: string; 
+/**
+ * 组名(单话、单行本、番外篇)
+ */
+groupName: string; 
+/**
+ * 此章节对应的group有多少章节
+ */
+groupSize: number; 
+/**
+ * 此章节在group中的顺序
+ */
+order: number; 
+/**
+ * 漫画状态(连载中/已完结)
+ */
+comicStatus: string; 
+/**
+ * 是否已下载
+ */
+isDownloaded?: boolean | null }
+export type Comic = { 
+/**
+ * 漫画id
+ */
+id: number; 
+/**
+ * 漫画标题
+ */
+title: string; 
+/**
+ * 漫画副标题
+ */
+subtitle: string | null; 
+/**
+ * 封面链接
+ */
+cover: string; 
+/**
+ * 漫画状态(连载中/已完结)
+ */
+status: string; 
+/**
+ * 上次更新时间
+ */
+updateTime: string; 
+/**
+ * 出版年份
+ */
+year: number; 
+/**
+ * 地区
+ */
+region: string; 
+/**
+ * 类型
+ */
+genres: string[]; 
+/**
+ * 作者
+ */
+authors: string[]; 
+/**
+ * 漫画别名
+ */
+aliases: string[]; 
+/**
+ * 简介
+ */
+intro: string; 
+/**
+ * 组名(单话、单行本...)->章节信息
+ */
+groups: { [key in string]: ChapterInfo[] } }
+export type ComicInFavorite = { 
+/**
+ * 漫画id
+ */
+id: number; 
+/**
+ * 漫画标题
+ */
+title: string; 
+/**
+ * 漫画封面链接
+ */
+cover: string; 
+/**
+ * 最近更新时间，两种格式
+ * - 2024-12-13
+ * - x分钟前
+ */
+lastUpdate: string; 
+/**
+ * 上次阅读时间，两种格式
+ * - 2024-12-13
+ * - x分钟前
+ */
+lastRead: string }
+export type ComicInSearch = { 
+/**
+ * 漫画id
+ */
+id: number; 
+/**
+ * 漫画标题
+ */
+title: string; 
+/**
+ * 漫画副标题
+ */
+subtitle: string | null; 
+/**
+ * 封面链接
+ */
+cover: string; 
+/**
+ * 漫画状态(连载中/已完结)
+ */
+status: string; 
+/**
+ * 上次更新时间
+ */
+updateTime: string; 
+/**
+ * 出版年份
+ */
+year: number; 
+/**
+ * 地区
+ */
+region: string; 
+/**
+ * 类型
+ */
+genres: string[]; 
+/**
+ * 作者
+ */
+authors: string[]; 
+/**
+ * 漫画别名
+ */
+aliases: string[]; 
+/**
+ * 简介
+ */
+intro: string }
+export type CommandError = { err_title: string; err_message: string }
+export type Config = { cookie: string; downloadDir: string; exportDir: string; downloadIntervalSec: number; enableFileLogger: boolean }
+export type DownloadEvent = { event: "Speed"; data: { speed: string } } | { event: "Sleeping"; data: { chapterId: number; remainingSec: number } }
+export type DownloadTaskEvent = { state: DownloadTaskState; chapterInfo: ChapterInfo; downloadedImgCount: number; totalImgCount: number }
+export type DownloadTaskState = "Pending" | "Downloading" | "Paused" | "Cancelled" | "Completed" | "Failed"
+export type ExportCbzEvent = { event: "Start"; data: { uuid: string; comicTitle: string; total: number } } | { event: "Progress"; data: { uuid: string; current: number } } | { event: "End"; data: { uuid: string } }
+export type ExportPdfEvent = { event: "CreateStart"; data: { uuid: string; comicTitle: string; total: number } } | { event: "CreateProgress"; data: { uuid: string; current: number } } | { event: "CreateEnd"; data: { uuid: string } } | { event: "MergeStart"; data: { uuid: string; comicTitle: string; total: number } } | { event: "MergeProgress"; data: { uuid: string; current: number } } | { event: "MergeEnd"; data: { uuid: string } }
+export type GetFavoriteResult = { comics: ComicInFavorite[]; current: number; total: number }
+export type JsonValue = null | boolean | number | string | JsonValue[] | { [key in string]: JsonValue }
+export type LogEvent = { timestamp: string; level: LogLevel; fields: { [key in string]: JsonValue }; target: string; filename: string; line_number: number }
+export type LogLevel = "TRACE" | "DEBUG" | "INFO" | "WARN" | "ERROR"
+export type SearchResult = { comics: ComicInSearch[]; current: number; total: number }
+export type UpdateDownloadedComicsEvent = { event: "GettingComics"; data: { total: number } } | { event: "ComicGot"; data: { current: number; total: number } } | { event: "DownloadTaskCreated" }
+export type UserProfile = { username: string; avatar: string }
 
 /** tauri-specta globals **/
 
@@ -125,7 +372,7 @@ type __EventObj__<T> = {
 	once: (
 		cb: TAURI_API_EVENT.EventCallback<T>,
 	) => ReturnType<typeof TAURI_API_EVENT.once<T>>;
-	emit: T extends null
+	emit: null extends T
 		? (payload?: T) => ReturnType<typeof TAURI_API_EVENT.emit>
 		: (payload: T) => ReturnType<typeof TAURI_API_EVENT.emit>;
 };

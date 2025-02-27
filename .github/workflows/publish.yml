@@ -6,7 +6,7 @@ on:
       - "v*"
 
 env:
-  REPO_NAME: bilibili-manga-watermark-remover
+  REPO_NAME: manhuagui-downloader
 
 jobs:
   get-version:

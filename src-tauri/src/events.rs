@@ -1,49 +1,101 @@
-use std::path::PathBuf;
+use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use tauri_specta::Event;
 
-pub mod prelude {
-    pub use crate::events::{
-        RemoveWatermarkEndEvent, RemoveWatermarkErrorEvent, RemoveWatermarkStartEvent,
-        RemoveWatermarkSuccessEvent,
-    };
+use crate::{
+    download_manager::DownloadTaskState,
+    types::{ChapterInfo, LogLevel},
+};
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type, Event)]
+#[serde(tag = "event", content = "data")]
+pub enum DownloadEvent {
+    #[serde(rename_all = "camelCase")]
+    Speed { speed: String },
+
+    #[serde(rename_all = "camelCase")]
+    Sleeping { chapter_id: i64, remaining_sec: u64 },
 }
 
-#[derive(Serialize, Deserialize, Clone, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct RemoveWatermarkStartEventPayload {
-    pub dir_path: PathBuf,
-    pub total: u32,
-}
-#[derive(Serialize, Deserialize, Clone, Type, Event)]
-pub struct RemoveWatermarkStartEvent(pub RemoveWatermarkStartEventPayload);
+#[derive(Debug, Clone, Serialize, Deserialize, Type, Event)]
+#[serde(tag = "event", content = "data")]
+pub enum ExportCbzEvent {
+    #[serde(rename_all = "camelCase")]
+    Start {
+        uuid: String,
+        comic_title: String,
+        total: u32,
+    },
 
-#[derive(Serialize, Deserialize, Clone, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct RemoveWatermarkSuccessEventPayload {
-    pub dir_path: PathBuf,
-    pub img_path: PathBuf,
-    pub current: u32,
-}
-#[derive(Serialize, Deserialize, Clone, Type, Event)]
-pub struct RemoveWatermarkSuccessEvent(pub RemoveWatermarkSuccessEventPayload);
+    #[serde(rename_all = "camelCase")]
+    Progress { uuid: String, current: u32 },
 
-#[derive(Serialize, Deserialize, Clone, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct RemoveWatermarkErrorEventPayload {
-    pub dir_path: PathBuf,
-    pub img_path: PathBuf,
-    pub err_msg: String,
+    #[serde(rename_all = "camelCase")]
+    End { uuid: String },
 }
-#[derive(Serialize, Deserialize, Clone, Type, Event)]
-pub struct RemoveWatermarkErrorEvent(pub RemoveWatermarkErrorEventPayload);
 
-#[derive(Serialize, Deserialize, Clone, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct RemoveWatermarkEndEventPayload {
-    pub dir_path: PathBuf,
+#[derive(Debug, Clone, Serialize, Deserialize, Type, Event)]
+#[serde(tag = "event", content = "data")]
+pub enum ExportPdfEvent {
+    #[serde(rename_all = "camelCase")]
+    CreateStart {
+        uuid: String,
+        comic_title: String,
+        total: u32,
+    },
+
+    #[serde(rename_all = "camelCase")]
+    CreateProgress { uuid: String, current: u32 },
+
+    #[serde(rename_all = "camelCase")]
+    CreateEnd { uuid: String },
+
+    #[serde(rename_all = "camelCase")]
+    MergeStart {
+        uuid: String,
+        comic_title: String,
+        total: u32,
+    },
+
+    #[serde(rename_all = "camelCase")]
+    MergeProgress { uuid: String, current: u32 },
+
+    #[serde(rename_all = "camelCase")]
+    MergeEnd { uuid: String },
 }
-#[derive(Serialize, Deserialize, Clone, Type, Event)]
-pub struct RemoveWatermarkEndEvent(pub RemoveWatermarkEndEventPayload);
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type, Event)]
+#[serde(tag = "event", content = "data")]
+pub enum UpdateDownloadedComicsEvent {
+    #[serde(rename_all = "camelCase")]
+    GettingComics { total: i64 },
+
+    #[serde(rename_all = "camelCase")]
+    ComicGot { current: i64, total: i64 },
+
+    #[serde(rename_all = "camelCase")]
+    DownloadTaskCreated,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type, Event)]
+#[serde(rename_all = "camelCase")]
+pub struct LogEvent {
+    pub timestamp: String,
+    pub level: LogLevel,
+    pub fields: HashMap<String, serde_json::Value>,
+    pub target: String,
+    pub filename: String,
+    #[serde(rename = "line_number")]
+    pub line_number: i64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type, Event)]
+#[serde(rename_all = "camelCase")]
+pub struct DownloadTaskEvent {
+    pub state: DownloadTaskState,
+    pub chapter_info: ChapterInfo,
+    pub downloaded_img_count: u32,
+    pub total_img_count: u32,
+}
