@@ -1,6 +1,5 @@
 # 哔哩哔哩漫画去水印工具
 
-test
 <p align="center">
     <img src="https://github.com/user-attachments/assets/b6526d0d-49c3-41ae-93d8-509d67eedaa8" width="200" style="align-self: center"/>
 </p>
