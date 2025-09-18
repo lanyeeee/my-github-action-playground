@@ -1,40 +1,56 @@
 [package]
-name = "bilibili-manga-watermark-remover"
-version = "0.0.0"
+name = "wnacg-downloader"
+version = "0.1.0"
 description = "A Tauri App"
 authors = ["you"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+# The `_lib` suffix may seem redundant but it is necessary
+# to make the lib name unique and wouldn't conflict with the bin name.
+# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
+name = "wnacg_downloader_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
 [build-dependencies]
-tauri-build = { version = "2.0.0-rc", features = [] }
+tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2.0.0-rc", features = ["devtools"] }
-tauri-plugin-shell = { version = "2.0.0-rc" }
-tauri-plugin-dialog = { version = "2.0.0-rc" }
-tauri-plugin-fs = { version = "2.0.0-rc" }
-
-specta = { version = "2.0.0-rc" }
-tauri-specta = { version = "2.0.0-rc", features = ["derive", "typescript"] }
-specta-typescript = { version = "0.0.7" }
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+tauri-plugin-dialog = "2"
 
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+yaserde = { version = "0.12.0", features = ["yaserde_derive"] }
 
-base64 = { version = "0.22.1" }
-image = { version = "0.25.1", default-features = false, features = ["jpeg", "png"] }
-jpeg-encoder = { version = "0.6.0", features = ["simd"] }
+specta = { version = "2.0.0-rc", features = ["serde_json"] }
+tauri-specta = { version = "2.0.0-rc", features = ["derive", "typescript"] }
+specta-typescript = { version = "0.0.9" }
 
-rayon = { version = "1.10" }
-walkdir = { version = "2" }
-anyhow = { version = "1.0" }
-showfile = { version = "0.1.1" }
+reqwest = { version = "0.12.12", features = ["rustls-tls"], default-features = false }
+reqwest-retry = { version = "0.7.0" }
+reqwest-middleware = { version = "0.4.0" }
+
+anyhow = { version = "1.0.96" }
 parking_lot = { version = "0.12.3", features = ["send_guard"] }
+tracing = { version = "0.1.41" }
+tracing-subscriber = { version = "0.3.19", features = ["json", "time", "local-time"] }
+tracing-appender = { version = "0.2.3" }
+notify = { version = "8.0.0" }
+tokio = { version = "1.43.0", features = ["full"] }
+scraper = { version = "0.23.1" }
+image = { version = "0.25.5", default-features = false, features = ["jpeg", "png", "webp"] }
+bytes = { version = "1.10.1" }
+lopdf = { git = "https://github.com/lanyeeee/lopdf", features = ["embed_image_jpeg", "embed_image_png", "embed_image_webp"] }
+uuid = { version = "1.15.1", features = ["v4"] }
+zip = { version = "2.2.3", default-features = false }
+
 
 [profile.release]
-strip = true      # Automatically strip symbols from the binary.
+strip = true
 lto = true
 codegen-units = 1
 panic = "abort"

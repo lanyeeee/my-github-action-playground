@@ -1,6 +1,9 @@
+use anyhow::anyhow;
+use scraper::error::SelectorErrorKind;
+
 pub trait AnyhowErrorToStringChain {
     /// 将 `anyhow::Error` 转换为chain格式  
-    /// # Example
+    /// # Example  
     /// 0: error message  
     /// 1: error message  
     /// 2: error message  
@@ -16,5 +19,15 @@ impl AnyhowErrorToStringChain for anyhow::Error {
                 let _ = writeln!(output, "{i}: {e}");
                 output
             })
+    }
+}
+
+pub trait ToAnyhow<T> {
+    fn to_anyhow(self) -> anyhow::Result<T>;
+}
+
+impl<T> ToAnyhow<T> for Result<T, SelectorErrorKind<'_>> {
+    fn to_anyhow(self) -> anyhow::Result<T> {
+        self.map_err(|e| anyhow!(e.to_string()))
     }
 }

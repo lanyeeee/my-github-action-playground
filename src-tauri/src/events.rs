@@ -1,49 +1,64 @@
-use std::path::PathBuf;
+use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use tauri_specta::Event;
 
-pub mod prelude {
-    pub use crate::events::{
-        RemoveWatermarkEndEvent, RemoveWatermarkErrorEvent, RemoveWatermarkStartEvent,
-        RemoveWatermarkSuccessEvent,
-    };
+use crate::{
+    download_manager::DownloadTaskState,
+    types::{Comic, LogLevel},
+};
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type, Event)]
+#[serde(rename_all = "camelCase")]
+pub struct LogEvent {
+    pub timestamp: String,
+    pub level: LogLevel,
+    pub fields: HashMap<String, serde_json::Value>,
+    pub target: String,
+    pub filename: String,
+    #[serde(rename = "line_number")]
+    pub line_number: i64,
 }
 
-#[derive(Serialize, Deserialize, Clone, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type, Event)]
 #[serde(rename_all = "camelCase")]
-pub struct RemoveWatermarkStartEventPayload {
-    pub dir_path: PathBuf,
-    pub total: u32,
+pub struct DownloadTaskEvent {
+    pub state: DownloadTaskState,
+    pub comic: Comic,
+    pub downloaded_img_count: u32,
+    pub total_img_count: u32,
 }
-#[derive(Serialize, Deserialize, Clone, Type, Event)]
-pub struct RemoveWatermarkStartEvent(pub RemoveWatermarkStartEventPayload);
 
-#[derive(Serialize, Deserialize, Clone, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type, Event)]
 #[serde(rename_all = "camelCase")]
-pub struct RemoveWatermarkSuccessEventPayload {
-    pub dir_path: PathBuf,
-    pub img_path: PathBuf,
-    pub current: u32,
+pub struct DownloadSpeedEvent {
+    pub speed: String,
 }
-#[derive(Serialize, Deserialize, Clone, Type, Event)]
-pub struct RemoveWatermarkSuccessEvent(pub RemoveWatermarkSuccessEventPayload);
 
-#[derive(Serialize, Deserialize, Clone, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type, Event)]
 #[serde(rename_all = "camelCase")]
-pub struct RemoveWatermarkErrorEventPayload {
-    pub dir_path: PathBuf,
-    pub img_path: PathBuf,
-    pub err_msg: String,
+pub struct DownloadSleepingEvent {
+    pub comic_id: i64,
+    pub remaining_sec: u64,
 }
-#[derive(Serialize, Deserialize, Clone, Type, Event)]
-pub struct RemoveWatermarkErrorEvent(pub RemoveWatermarkErrorEventPayload);
 
-#[derive(Serialize, Deserialize, Clone, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct RemoveWatermarkEndEventPayload {
-    pub dir_path: PathBuf,
+#[derive(Debug, Clone, Serialize, Deserialize, Type, Event)]
+#[serde(tag = "event", content = "data")]
+pub enum ExportPdfEvent {
+    #[serde(rename_all = "camelCase")]
+    Start { uuid: String, title: String },
+
+    #[serde(rename_all = "camelCase")]
+    End { uuid: String },
 }
-#[derive(Serialize, Deserialize, Clone, Type, Event)]
-pub struct RemoveWatermarkEndEvent(pub RemoveWatermarkEndEventPayload);
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type, Event)]
+#[serde(tag = "event", content = "data")]
+pub enum ExportCbzEvent {
+    #[serde(rename_all = "camelCase")]
+    Start { uuid: String, title: String },
+
+    #[serde(rename_all = "camelCase")]
+    End { uuid: String },
+}

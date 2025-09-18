@@ -5,59 +5,8 @@
 
 
 export const commands = {
-async generateBackground(mangaDir: string, rectData: RectData | null, width: number, height: number) : Promise<Result<null, CommandError>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("generate_background", { mangaDir, rectData, width, height }) };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
-async removeWatermark(mangaDir: string, outputDir: string, format: ImageFormat, optimize: boolean, backgroundsData: ([JpgImageData, JpgImageData])[]) : Promise<Result<null, CommandError>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("remove_watermark", { mangaDir, outputDir, format, optimize, backgroundsData }) };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
-async openImage(path: string) : Promise<Result<JpgImageData, CommandError>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("open_image", { path }) };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
-async getMangaDirData(mangaDir: string) : Promise<Result<MangaDirData[], CommandError>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("get_manga_dir_data", { mangaDir }) };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
-async getJpgImageInfos(mangaDir: string) : Promise<JpgImageInfo[]> {
-    return await TAURI_INVOKE("get_jpg_image_infos", { mangaDir });
-},
-async showPathInFileManager(path: string) : Promise<void> {
-    await TAURI_INVOKE("show_path_in_file_manager", { path });
-},
-async getBackgroundDirRelativePath(mangaDir: string, width: number, height: number) : Promise<Result<string, CommandError>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("get_background_dir_relative_path", { mangaDir, width, height }) };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
-async getBackgroundDirAbsPath(mangaDir: string, width: number, height: number) : Promise<Result<string, CommandError>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("get_background_dir_abs_path", { mangaDir, width, height }) };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
+async greet(name: string) : Promise<string> {
+    return await TAURI_INVOKE("greet", { name });
 },
 async getConfig() : Promise<Config> {
     return await TAURI_INVOKE("get_config");
@@ -69,6 +18,129 @@ async saveConfig(config: Config) : Promise<Result<null, CommandError>> {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
+},
+async login(username: string, password: string) : Promise<Result<string, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("login", { username, password }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async getUserProfile() : Promise<Result<UserProfile, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_user_profile") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async searchByKeyword(keyword: string, pageNum: number) : Promise<Result<SearchResult, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("search_by_keyword", { keyword, pageNum }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async searchByTag(tagName: string, pageNum: number) : Promise<Result<SearchResult, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("search_by_tag", { tagName, pageNum }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async getComic(id: number) : Promise<Result<Comic, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_comic", { id }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async getFavorite(shelfId: number, pageNum: number) : Promise<Result<GetFavoriteResult, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_favorite", { shelfId, pageNum }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async createDownloadTask(comic: Comic) : Promise<void> {
+    await TAURI_INVOKE("create_download_task", { comic });
+},
+async pauseDownloadTask(comicId: number) : Promise<Result<null, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("pause_download_task", { comicId }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async resumeDownloadTask(comicId: number) : Promise<Result<null, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("resume_download_task", { comicId }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async cancelDownloadTask(comicId: number) : Promise<Result<null, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("cancel_download_task", { comicId }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async getDownloadedComics() : Promise<Result<Comic[], CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_downloaded_comics") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async exportPdf(comic: Comic) : Promise<Result<null, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("export_pdf", { comic }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async exportCbz(comic: Comic) : Promise<Result<null, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("export_cbz", { comic }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async getLogsDirSize() : Promise<Result<number, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_logs_dir_size") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async showPathInFileManager(path: string) : Promise<Result<null, CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("show_path_in_file_manager", { path }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async getCoverData(coverUrl: string) : Promise<Result<number[], CommandError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_cover_data", { coverUrl }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 }
 }
 
@@ -76,15 +148,19 @@ async saveConfig(config: Config) : Promise<Result<null, CommandError>> {
 
 
 export const events = __makeEvents__<{
-removeWatermarkEndEvent: RemoveWatermarkEndEvent,
-removeWatermarkErrorEvent: RemoveWatermarkErrorEvent,
-removeWatermarkStartEvent: RemoveWatermarkStartEvent,
-removeWatermarkSuccessEvent: RemoveWatermarkSuccessEvent
+downloadSleepingEvent: DownloadSleepingEvent,
+downloadSpeedEvent: DownloadSpeedEvent,
+downloadTaskEvent: DownloadTaskEvent,
+exportCbzEvent: ExportCbzEvent,
+exportPdfEvent: ExportPdfEvent,
+logEvent: LogEvent
 }>({
-removeWatermarkEndEvent: "remove-watermark-end-event",
-removeWatermarkErrorEvent: "remove-watermark-error-event",
-removeWatermarkStartEvent: "remove-watermark-start-event",
-removeWatermarkSuccessEvent: "remove-watermark-success-event"
+downloadSleepingEvent: "download-sleeping-event",
+downloadSpeedEvent: "download-speed-event",
+downloadTaskEvent: "download-task-event",
+exportCbzEvent: "export-cbz-event",
+exportPdfEvent: "export-pdf-event",
+logEvent: "log-event"
 })
 
 /** user-defined constants **/
@@ -93,21 +169,146 @@ removeWatermarkSuccessEvent: "remove-watermark-success-event"
 
 /** user-defined types **/
 
-export type CommandError = string
-export type Config = { outputDir: string; outputFormat: ImageFormat; outputOptimize: boolean }
-export type ImageFormat = "Jpeg" | "Png"
-export type JpgImageData = { info: JpgImageInfo; base64: string }
-export type JpgImageInfo = { width: number; height: number; path: string }
-export type MangaDirData = { width: number; height: number; count: number; blackBackground: JpgImageData | null; whiteBackground: JpgImageData | null }
-export type RectData = { left: number; top: number; right: number; bottom: number }
-export type RemoveWatermarkEndEvent = RemoveWatermarkEndEventPayload
-export type RemoveWatermarkEndEventPayload = { dirPath: string }
-export type RemoveWatermarkErrorEvent = RemoveWatermarkErrorEventPayload
-export type RemoveWatermarkErrorEventPayload = { dirPath: string; imgPath: string; errMsg: string }
-export type RemoveWatermarkStartEvent = RemoveWatermarkStartEventPayload
-export type RemoveWatermarkStartEventPayload = { dirPath: string; total: number }
-export type RemoveWatermarkSuccessEvent = RemoveWatermarkSuccessEventPayload
-export type RemoveWatermarkSuccessEventPayload = { dirPath: string; imgPath: string; current: number }
+export type Comic = { 
+/**
+ * 漫画id
+ */
+id: number; 
+/**
+ * 漫画标题
+ */
+title: string; 
+/**
+ * 封面链接
+ */
+cover: string; 
+/**
+ * 分类
+ */
+category: string; 
+/**
+ * 漫画有多少张图片
+ */
+imageCount: number; 
+/**
+ * 标签
+ */
+tags: Tag[]; 
+/**
+ * 简介
+ */
+intro: string; 
+/**
+ * 是否已下载
+ */
+isDownloaded?: boolean | null; 
+/**
+ * 图片列表
+ */
+imgList: ImgList }
+export type ComicInFavorite = { 
+/**
+ * 漫画id
+ */
+id: number; 
+/**
+ * 漫画标题
+ */
+title: string; 
+/**
+ * 漫画封面链接
+ */
+cover: string; 
+/**
+ * 加入收藏的时间
+ * 2025-01-04 16:04:34
+ */
+favoriteTime: string; 
+/**
+ * 这个漫画属于的书架
+ */
+shelf: Shelf; 
+/**
+ * 是否已下载
+ */
+isDownloaded: boolean }
+export type ComicInSearch = { 
+/**
+ * 漫画id
+ */
+id: number; 
+/**
+ * 漫画标题(带html标签，用于显示匹配关键词)
+ */
+titleHtml: string; 
+/**
+ * 漫画标题
+ */
+title: string; 
+/**
+ * 封面链接
+ */
+cover: string; 
+/**
+ * 额外信息(209張圖片， 創建於2025-01-05 18:33:19)
+ */
+additionalInfo: string; 
+/**
+ * 是否已下载
+ */
+isDownloaded: boolean }
+export type CommandError = { err_title: string; err_message: string }
+export type Config = { cookie: string; downloadDir: string; exportDir: string; enableFileLogger: boolean; downloadFormat: DownloadFormat; comicConcurrency: number; comicDownloadIntervalSec: number; imgConcurrency: number; imgDownloadIntervalSec: number }
+export type DownloadFormat = "Jpeg" | "Png" | "Webp" | "Original"
+export type DownloadSleepingEvent = { comicId: number; remainingSec: number }
+export type DownloadSpeedEvent = { speed: string }
+export type DownloadTaskEvent = { state: DownloadTaskState; comic: Comic; downloadedImgCount: number; totalImgCount: number }
+export type DownloadTaskState = "Pending" | "Downloading" | "Paused" | "Cancelled" | "Completed" | "Failed"
+export type ExportCbzEvent = { event: "Start"; data: { uuid: string; title: string } } | { event: "End"; data: { uuid: string } }
+export type ExportPdfEvent = { event: "Start"; data: { uuid: string; title: string } } | { event: "End"; data: { uuid: string } }
+export type GetFavoriteResult = { comics: ComicInFavorite[]; currentPage: number; totalPage: number; shelf: Shelf; shelves: Shelf[] }
+export type ImgInImgList = { 
+/**
+ * 图片标题([01]、[001]，根据漫画总页数确定)
+ */
+caption: string; 
+/**
+ * 图片url(//img5.wnimg.ru/data/2826/33/01.jpg，缺https:前缀)
+ * 最后一张图片为/themes/weitu/images/bg/shoucang.jpg，记得过滤
+ */
+url: string }
+export type ImgList = ImgInImgList[]
+export type JsonValue = null | boolean | number | string | JsonValue[] | Partial<{ [key in string]: JsonValue }>
+export type LogEvent = { timestamp: string; level: LogLevel; fields: Partial<{ [key in string]: JsonValue }>; target: string; filename: string; line_number: number }
+export type LogLevel = "TRACE" | "DEBUG" | "INFO" | "WARN" | "ERROR"
+export type SearchResult = { comics: ComicInSearch[]; currentPage: number; totalPage: number; isSearchByTag: boolean }
+export type Shelf = { 
+/**
+ * 书架id
+ */
+id: number; 
+/**
+ * 书架名称
+ */
+name: string }
+export type Tag = { 
+/**
+ * 标签名
+ */
+name: string; 
+/**
+ * 标签链接
+ */
+url: string }
+export type UserProfile = { 
+/**
+ * 用户名
+ */
+username: string; 
+/**
+ * 头像url
+ */
+avatar: string }
 
 /** tauri-specta globals **/
 
@@ -125,7 +326,7 @@ type __EventObj__<T> = {
 	once: (
 		cb: TAURI_API_EVENT.EventCallback<T>,
 	) => ReturnType<typeof TAURI_API_EVENT.once<T>>;
-	emit: T extends null
+	emit: null extends T
 		? (payload?: T) => ReturnType<typeof TAURI_API_EVENT.emit>
 		: (payload: T) => ReturnType<typeof TAURI_API_EVENT.emit>;
 };
